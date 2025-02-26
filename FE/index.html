@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SVG Arena</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+
+<!--Move the SVG component to another file and import it-->
+  <svg id="arena" width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="1024" height="1024" fill="#444" />
+    <rect width="100" height="100" x="32" y="32" fill="#333" />
+    <image
+      id="backround"
+      href="1024_1024-bg.png"
+      width="1024"
+      height="1024"
+      x="0" 
+      y="0"
+    />
+    <!-- Player 1-->
+    <image
+      id="player"
+      href="64_64-tank.png"
+      width="32"
+      height="32"
+      x="480" 
+      y="480"
+    />
+    <!-- Player 2-->
+    <image
+      id="player2"
+      href="buggy_16x16.png"
+      width="32"
+      height="32"
+      x="480" 
+      y="480"
+    />
+  </svg>
+
+<button id="test">test</button>
+
+  <script type="module" src="index.js"></script>
+</body>
+</html>

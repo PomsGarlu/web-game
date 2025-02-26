@@ -1,0 +1,16 @@
+{
+  "name": "be",
+  "version": "1.0.0",
+  "description": "backend for a demo game ",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "KMH",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "node.js": "^0.0.1-security",
+    "websocket": "^1.0.35"
+  }
+}
