@@ -11,6 +11,7 @@
   "dependencies": {
     "axios": "^1.7.9",
     "node.js": "^0.0.1-security",
-    "websocket": "^1.0.35"
+    "websocket": "^1.0.35",
+    "ws": "^8.18.1"
   }
 }
