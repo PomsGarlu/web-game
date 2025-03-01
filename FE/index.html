@@ -8,23 +8,23 @@
     </head>
 
     <body>
-        <!--Move the SVG component to another file and import it-->
+        <!-- SVG Arena -->
         <svg id="arena" width="1344" height="768" viewBox="0 0 1344 768" xmlns="http://www.w3.org/2000/svg">
             <!-- Background -->
             <rect width="1344" height="768" fill="#444" />
             <rect width="1344" height="768" x="32" y="32" fill="#333" />
-            <image id="backround" href="1344x768.png" width="1344" height="768" x="0" y="0" />
-            <!-- Player 1-->
+            <image id="background" href="1344x768.png" width="1344" height="768" x="0" y="0" />
+
+            <!-- Players -->
             <image id="player" href="player1tank.png" width="26" height="52" x="480" y="480" />
-            <!-- Player 2-->
             <image id="player2" href="player2tank.png" width="26" height="52" x="480" y="480" />
-            <image id="bullet1" href="bullet1.png" width="10" height="14" x="580" y="580" style="display: none" />
-            <image id="bullet2" href="bullet2.png" width="10" height="14" x="680" y="580" />
-            <image id="bullet3" href="bullet3.png" width="10" height="14" x="780" y="580" />
-            <image id="bullet4" href="bullet4.png" width="10" height="14" x="880" y="580" />
+
+            <!-- Bullet Container (For dynamically created bullets) -->
+            <g id="bullet-container"></g>
         </svg>
 
-        <button id="test">test</button>
+        <!-- Debugging Button -->
+        <button id="test">Test</button>
 
         <script type="module" src="index.js"></script>
     </body>

@@ -1,5 +1,9 @@
 const ws = new WebSocket("ws://localhost:8080");
 import { C } from "./src/constants.js";
+const bullets = []; // Array to store active bullets
+const bulletContainer = document.getElementById("bullet-container"); // Parent container for bullets
+let lastShotTime = 0;
+const FIRE_RATE = 200; // 200ms delay between shots
 
 let x = (C.ARENA_SIZE_X - C.PLAYER_SIZE_X) / 2;
 let y = (C.ARENA_SIZE_Y - C.PLAYER_SIZE_Y) / 2;
@@ -26,6 +30,7 @@ const bullet = document.getElementById("bullet1");
 
 function gameLoop() {
     updateLocalPlayer();
+    updateBullets();
     requestAnimationFrame(gameLoop);
 }
 
@@ -63,61 +68,74 @@ function movePlayer(dx, dy, rotation) {
     player.setAttribute("transform", `rotate(${rotation} ${x + C.PLAYER_SIZE_X / 2} ${y + C.PLAYER_SIZE_Y / 2})`); // Rotate player around its center
 }
 
-function shootBullet() {
-    const direction = bulletDirection;
-    console.log(direction);
+function shootBullet(playerId) {
+    if (!bulletDirection) {
+        console.log("Cannot shoot: No bullet direction set!");
+        return;
+    }
 
+    const bulletImages = {
+        1: "bullet1.png",
+        2: "bullet2.png",
+        3: "bullet3.png",
+        4: "bullet4.png"
+    };
+
+    const bulletImg = bulletImages[playerId] || "bullet1.png"; // Default to player 1's bullet
+
+    const bullet = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    bullet.setAttribute("href", bulletImg);
+    bullet.setAttribute("width", "10");
+    bullet.setAttribute("height", "14");
+
+    // Get player position
     let bulletX = parseFloat(player.getAttribute("x")) + 8;
     let bulletY = parseFloat(player.getAttribute("y")) - 15;
 
-    switch (direction) {
+    let velocityX = 0;
+    let velocityY = 0;
+    let angle = 0; // Default is facing "up"
+
+    // Adjust bullet spawn position & angle based on direction
+    switch (bulletDirection) {
         case "left":
-            bulletX += -34;
+            bulletX -= 34;
             bulletY += 34;
+            angle = -90;
+            velocityX = -C.BULLET_SPEED;
             break;
         case "right":
             bulletX += 34;
             bulletY += 34;
+            angle = 90;
+            velocityX = C.BULLET_SPEED;
             break;
         case "down":
             bulletX += 0;
             bulletY += 68;
+            angle = 180;
+            velocityY = C.BULLET_SPEED;
+            break;
+        case "up":
+        default:
+            velocityY = -C.BULLET_SPEED;
             break;
     }
 
     bullet.setAttribute("x", bulletX);
     bullet.setAttribute("y", bulletY);
-    bullet.style.display = "block";
 
-    const bulletWidth = parseFloat(bullet.getAttribute("width")) / 2;
-    const bulletHeight = parseFloat(bullet.getAttribute("height")) / 2;
-    const centerX = bulletX + bulletWidth;
-    const centerY = bulletY + bulletHeight;
-
-    let velocityX = 0;
-    let velocityY = 0;
-    let angle = 0;
-
-    switch (direction) {
-        case "up":
-            angle = 0;
-            velocityY = -C.BULLET_SPEED;
-            break;
-        case "down":
-            angle = 180;
-            velocityY = C.BULLET_SPEED;
-            break;
-        case "left":
-            angle = -90;
-            velocityX = -C.BULLET_SPEED;
-            break;
-        case "right":
-            angle = 90;
-            velocityX = C.BULLET_SPEED;
-            break;
-    }
-
+    // Center point for rotation
+    const centerX = bulletX + 5; // Center horizontally (width/2)
+    const centerY = bulletY + 7; // Center vertically (height/2)
+    
+    // Rotate bullet
     bullet.setAttribute("transform", `rotate(${angle} ${centerX} ${centerY})`);
+
+    // Add to bullet container
+    document.getElementById("bullet-container").appendChild(bullet);
+
+    bullets.push({ element: bullet, x: bulletX, y: bulletY, vx: velocityX, vy: velocityY });
 
     function animateBullet() {
         bulletX += velocityX;
@@ -126,19 +144,35 @@ function shootBullet() {
         bullet.setAttribute("x", bulletX);
         bullet.setAttribute("y", bulletY);
 
-        const newCenterX = bulletX + bulletWidth;
-        const newCenterY = bulletY + bulletHeight;
-
-        bullet.setAttribute("transform", `rotate(${angle} ${newCenterX} ${newCenterY})`);
+        // Keep the rotation while moving
+        bullet.setAttribute("transform", `rotate(${angle} ${bulletX + 5} ${bulletY + 7})`);
 
         if (bulletX > 0 && bulletX < 1344 && bulletY > 0 && bulletY < 768) {
             requestAnimationFrame(animateBullet);
         } else {
-            bullet.style.display = "none";
+            bullet.remove();
         }
     }
 
     requestAnimationFrame(animateBullet);
+}
+
+
+
+function updateBullets() {
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        let bullet = bullets[i];
+        bullet.x += bullet.vx;
+        bullet.y += bullet.vy;
+
+        bullet.element.setAttribute("x", bullet.x);
+        bullet.element.setAttribute("y", bullet.y);
+
+        if (bullet.x < 0 || bullet.x > 1344 || bullet.y < 0 || bullet.y > 768) {
+            bullet.element.remove();
+            bullets.splice(i, 1); // Remove bullet from array
+        }
+    }
 }
 
 const keys = {
@@ -152,12 +186,22 @@ const keys = {
     d: false,
 };
 
+
+
 document.addEventListener("keydown", (e) => {
-    if (keys[e.key]) return;
+    if (keys[e.key]) return; // Prevent repeated keydown events
     keys[e.key] = true;
+
     if (e.key === " ") {
-        if (bullet.style.display === "none" && Object.values(keys).filter((value) => value === true).length === 1) {
-            shootBullet();
+        const now = Date.now();
+        if (now - lastShotTime > FIRE_RATE) {
+            if (bulletDirection) { // Ensure a valid direction before shooting
+                console.log("Shooting bullet...");
+                lastShotTime = now;  // Update before shooting
+                shootBullet();
+            } else {
+                console.log("Cannot shoot: No bullet direction set!");
+            }
         }
     }
 });
