@@ -124,6 +124,7 @@ function shootBullet(playerId) {
 
     bullet.setAttribute("x", bulletX);
     bullet.setAttribute("y", bulletY);
+    
 
     // Center point for rotation
     const centerX = bulletX + 5; // Center horizontally (width/2)
@@ -157,7 +158,40 @@ function shootBullet(playerId) {
     requestAnimationFrame(animateBullet);
 }
 
+function checkBulletCollision(bullet) {
+    const players = [document.getElementById("player"), document.getElementById("player2")]; // Add more if needed
 
+    for (const player of players) {
+        if (player) {
+            const bulletBox = bullet.element.getBBox();
+            const playerBox = player.getBBox();
+
+            if (
+                bulletBox.x < playerBox.x + playerBox.width &&
+                bulletBox.x + bulletBox.width > playerBox.x &&
+                bulletBox.y < playerBox.y + playerBox.height &&
+                bulletBox.y + bulletBox.height > playerBox.y
+            ) {
+                console.log(`Bullet hit ${player.id}!`);
+                handlePlayerHit(player);
+                return true; // Collision detected
+            }
+        }
+    }
+    return false;
+}
+
+function handlePlayerHit(player) {
+    console.log(`${player.id} was hit!`);
+
+    // Example: Flash effect
+    player.style.filter = "brightness(2)";
+    setTimeout(() => {
+        player.style.filter = "none";
+    }, 200);
+
+    // (Optional) Add health system
+}
 
 function updateBullets() {
     for (let i = bullets.length - 1; i >= 0; i--) {
@@ -168,9 +202,21 @@ function updateBullets() {
         bullet.element.setAttribute("x", bullet.x);
         bullet.element.setAttribute("y", bullet.y);
 
+        // Keep bullet rotated while moving
+        const angle = parseFloat(bullet.element.getAttribute("transform").match(/rotate\((-?\d+)/)[1]);
+        bullet.element.setAttribute("transform", `rotate(${angle} ${bullet.x + 5} ${bullet.y + 7})`);
+
+        // Check if bullet hits a player
+        if (checkBulletCollision(bullet)) {
+            bullet.element.remove();
+            bullets.splice(i, 1); // Remove bullet
+            continue;
+        }
+
+        // Remove bullet if out of bounds
         if (bullet.x < 0 || bullet.x > 1344 || bullet.y < 0 || bullet.y > 768) {
             bullet.element.remove();
-            bullets.splice(i, 1); // Remove bullet from array
+            bullets.splice(i, 1);
         }
     }
 }
