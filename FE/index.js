@@ -1,13 +1,31 @@
 const ws = new WebSocket("ws://localhost:8080");
 import { C } from "./src/constants.js";
 const bullets = []; // Array to store active bullets
-const bulletContainer = document.getElementById("bullet-container"); // Parent container for bullets
 let lastShotTime = 0;
 const FIRE_RATE = 200; // 200ms delay between shots
+const players = [ document.getElementById("player1"),
+    document.getElementById("player2"),
+    document.getElementById("player3"),
+    document.getElementById("player4")
+
+]
+const player = players[0] // Replace with your player element's ID
+
+const playerHealth = {
+    player1: 100,
+    player2: 100,
+    player3: 100,
+    player4: 100,
+};
+
+players.forEach(player => {
+    player.dataset.health = playerHealth[player.id]; // Assign health based on player ID
+});
+
+
 
 let x = (C.ARENA_SIZE_X - C.PLAYER_SIZE_X) / 2;
 let y = (C.ARENA_SIZE_Y - C.PLAYER_SIZE_Y) / 2;
-let fps = {};
 let bulletDirection = null;
 
 ws.onopen = () => {
@@ -25,8 +43,7 @@ ws.onerror = (error) => {
 ws.onclose = () => {
     console.log("WebSocket connection closed");
 };
-const player = document.getElementById("player"); // Replace with your player element's ID
-const bullet = document.getElementById("bullet1");
+
 
 function gameLoop() {
     updateLocalPlayer();
@@ -159,9 +176,8 @@ function shootBullet(playerId) {
 }
 
 function checkBulletCollision(bullet) {
-    const players = [document.getElementById("player"), document.getElementById("player2")]; // Add more if needed
 
-    for (const player of players) {
+    for (const player of Object.values(players)) {
         if (player) {
             const bulletBox = bullet.element.getBBox();
             const playerBox = player.getBBox();
@@ -185,26 +201,75 @@ function checkBulletCollision(bullet) {
 function handlePlayerHit(player, bullet) {
     console.log(`${player.id} was hit!`);
 
-    // Use bullet's last position instead of player's position
-    const explosionX = bullet.x - 13; // Offset to center explosion on bullet
-    const explosionY = bullet.y - 13; // Offset to center explosion on bullet
+    // Decrease health
+    playerHealth[player.id] -= 20;
+    console.log(`${player.id} health: ${playerHealth[player.id]}`);
+
+    // Update the player's `data-health` attribute (optional for debugging)
+    player.setAttribute("data-health", playerHealth[player.id]);
+
+    // Apply glow effect
+    player.style.filter = "brightness(2)";
+    setTimeout(() => {
+        player.style.filter = "none";
+    }, 500);
+
+    // Determine explosion position based on bullet impact
+    const explosionX = bullet?.x ? bullet.x - 13 : player.x.baseVal.value;
+    const explosionY = bullet?.y ? bullet.y - 13 : player.y.baseVal.value;
 
     // Create explosion image
     const explosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
-    explosion.setAttribute("href", "Explosion52.gif");
-    explosion.setAttribute("width", "52");
-    explosion.setAttribute("height", "52");
-    explosion.setAttribute("x", explosionX);
-    explosion.setAttribute("y", explosionY);
 
-    // Add explosion to the arena
-    document.getElementById("arena").appendChild(explosion);
+    if (playerHealth[player.id] <= 0) {
+        console.log(`${player.id} is eliminated!`);
 
-    // Remove explosion after 500ms
-    setTimeout(() => {
-        explosion.remove();
-    }, 500);
+        // Use "Explosion53.gif" for destroyed tanks
+        const tankExplosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
+        tankExplosion.setAttribute("href", "Explosion53.gif");
+        tankExplosion.setAttribute("width", "100"); // Adjust size as needed
+        tankExplosion.setAttribute("height", "100");
+        
+        // Center explosion on tank
+        const tankX = player.x.baseVal.value - 25; // Offset to center
+        const tankY = player.y.baseVal.value - 25; // Offset to center
+        
+        tankExplosion.setAttribute("x", tankX);
+        tankExplosion.setAttribute("y", tankY);
+
+        // Add explosion to the arena
+        document.getElementById("arena").appendChild(tankExplosion);
+
+        // Remove tank after a short delay for a smoother explosion effect
+        setTimeout(() => {
+            player.remove();
+            delete players[player.id]; // Remove from the players object
+        }, 100);
+
+        // Remove explosion after 800ms for a more dramatic effect
+        setTimeout(() => {
+            tankExplosion.remove();
+        }, 800);
+
+    } else {
+        // Use normal explosion for non-lethal hits (Bullet impact)
+        explosion.setAttribute("href", "Explosion52.gif");
+        explosion.setAttribute("width", "52");
+        explosion.setAttribute("height", "52");
+        explosion.setAttribute("x", explosionX);
+        explosion.setAttribute("y", explosionY);
+
+        // Add explosion to the arena
+        document.getElementById("arena").appendChild(explosion);
+
+        // Remove explosion after 500ms
+        setTimeout(() => {
+            explosion.remove();
+        }, 500);
+    }
 }
+
+
 
 
 function updateBullets() {
