@@ -173,7 +173,7 @@ function checkBulletCollision(bullet) {
                 bulletBox.y + bulletBox.height > playerBox.y
             ) {
                 console.log(`Bullet hit ${player.id}!`);
-                handlePlayerHit(player);
+                handlePlayerHit(player, bullet); // Pass bullet position to explosion
                 return true; // Collision detected
             }
         }
@@ -181,17 +181,31 @@ function checkBulletCollision(bullet) {
     return false;
 }
 
-function handlePlayerHit(player) {
+
+function handlePlayerHit(player, bullet) {
     console.log(`${player.id} was hit!`);
 
-    // Example: Flash effect
-    player.style.filter = "brightness(2)";
-    setTimeout(() => {
-        player.style.filter = "none";
-    }, 200);
+    // Use bullet's last position instead of player's position
+    const explosionX = bullet.x - 13; // Offset to center explosion on bullet
+    const explosionY = bullet.y - 13; // Offset to center explosion on bullet
 
-    // (Optional) Add health system
+    // Create explosion image
+    const explosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    explosion.setAttribute("href", "Explosion52.gif");
+    explosion.setAttribute("width", "52");
+    explosion.setAttribute("height", "52");
+    explosion.setAttribute("x", explosionX);
+    explosion.setAttribute("y", explosionY);
+
+    // Add explosion to the arena
+    document.getElementById("arena").appendChild(explosion);
+
+    // Remove explosion after 500ms
+    setTimeout(() => {
+        explosion.remove();
+    }, 500);
 }
+
 
 function updateBullets() {
     for (let i = bullets.length - 1; i >= 0; i--) {
