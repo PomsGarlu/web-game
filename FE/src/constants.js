@@ -4,5 +4,5 @@ export const C = {
     MOVE_SPEED: 1,
     PLAYER_SIZE_X: 26,
     PLAYER_SIZE_Y: 52,
-    BULLET_SPEED: 2,
+    BULLET_SPEED: 3,
 };

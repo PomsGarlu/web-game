@@ -3,13 +3,13 @@ import { C } from "./src/constants.js";
 const bullets = []; // Array to store active bullets
 let lastShotTime = 0;
 const FIRE_RATE = 200; // 200ms delay between shots
-const players = [ document.getElementById("player1"),
+const players = [
+    document.getElementById("player1"),
     document.getElementById("player2"),
     document.getElementById("player3"),
-    document.getElementById("player4")
-
-]
-const player = players[0] // Replace with your player element's ID
+    document.getElementById("player4"),
+];
+const player = players[0]; // Replace with your player element's ID
 
 const playerHealth = {
     player1: 100,
@@ -18,11 +18,9 @@ const playerHealth = {
     player4: 100,
 };
 
-players.forEach(player => {
+players.forEach((player) => {
     player.dataset.health = playerHealth[player.id]; // Assign health based on player ID
 });
-
-
 
 let x = (C.ARENA_SIZE_X - C.PLAYER_SIZE_X) / 2;
 let y = (C.ARENA_SIZE_Y - C.PLAYER_SIZE_Y) / 2;
@@ -43,7 +41,6 @@ ws.onerror = (error) => {
 ws.onclose = () => {
     console.log("WebSocket connection closed");
 };
-
 
 function gameLoop() {
     updateLocalPlayer();
@@ -77,6 +74,18 @@ function movePlayer(dx, dy, rotation) {
         case 90:
             bulletDirection = "right";
             break;
+        case -45:
+            bulletDirection = "upleft";
+            break;
+        case 45:
+            bulletDirection = "upright";
+            break;
+        case -135:
+            bulletDirection = "downleft";
+            break;
+        case 135:
+            bulletDirection = "downright";
+            break;
     }
     x = Math.max(0, Math.min(C.ARENA_SIZE_X - C.PLAYER_SIZE_X, x + dx)); // Clamp x within arena
     y = Math.max(0, Math.min(C.ARENA_SIZE_Y - C.PLAYER_SIZE_Y, y + dy)); // Clamp y within arena
@@ -95,7 +104,7 @@ function shootBullet(playerId) {
         1: "bullet1.png",
         2: "bullet2.png",
         3: "bullet3.png",
-        4: "bullet4.png"
+        4: "bullet4.png",
     };
 
     const bulletImg = bulletImages[playerId] || "bullet1.png"; // Default to player 1's bullet
@@ -133,6 +142,34 @@ function shootBullet(playerId) {
             angle = 180;
             velocityY = C.BULLET_SPEED;
             break;
+        case "upleft":
+            bulletX += -20;
+            bulletY += 15;
+            angle = -45;
+            velocityY = -C.BULLET_SPEED;
+            velocityX = -C.BULLET_SPEED;
+            break;
+        case "upright":
+            bulletX += 20;
+            bulletY += 15;
+            angle = 45;
+            velocityY = -C.BULLET_SPEED;
+            velocityX = C.BULLET_SPEED;
+            break;
+        case "downleft":
+            bulletX += -16;
+            bulletY += 50;
+            angle = -135;
+            velocityY = C.BULLET_SPEED;
+            velocityX = -C.BULLET_SPEED;
+            break;
+        case "downright":
+            bulletX += 16;
+            bulletY += 50;
+            angle = 135;
+            velocityY = C.BULLET_SPEED;
+            velocityX = C.BULLET_SPEED;
+            break;
         case "up":
         default:
             velocityY = -C.BULLET_SPEED;
@@ -141,12 +178,11 @@ function shootBullet(playerId) {
 
     bullet.setAttribute("x", bulletX);
     bullet.setAttribute("y", bulletY);
-    
 
     // Center point for rotation
     const centerX = bulletX + 5; // Center horizontally (width/2)
     const centerY = bulletY + 7; // Center vertically (height/2)
-    
+
     // Rotate bullet
     bullet.setAttribute("transform", `rotate(${angle} ${centerX} ${centerY})`);
 
@@ -176,7 +212,6 @@ function shootBullet(playerId) {
 }
 
 function checkBulletCollision(bullet) {
-
     for (const player of Object.values(players)) {
         if (player) {
             const bulletBox = bullet.element.getBBox();
@@ -196,7 +231,6 @@ function checkBulletCollision(bullet) {
     }
     return false;
 }
-
 
 function handlePlayerHit(player, bullet) {
     console.log(`${player.id} was hit!`);
@@ -229,11 +263,11 @@ function handlePlayerHit(player, bullet) {
         tankExplosion.setAttribute("href", "Explosion53.gif");
         tankExplosion.setAttribute("width", "100"); // Adjust size as needed
         tankExplosion.setAttribute("height", "100");
-        
+
         // Center explosion on tank
         const tankX = player.x.baseVal.value - 25; // Offset to center
         const tankY = player.y.baseVal.value - 25; // Offset to center
-        
+
         tankExplosion.setAttribute("x", tankX);
         tankExplosion.setAttribute("y", tankY);
 
@@ -250,7 +284,6 @@ function handlePlayerHit(player, bullet) {
         setTimeout(() => {
             tankExplosion.remove();
         }, 800);
-
     } else {
         // Use normal explosion for non-lethal hits (Bullet impact)
         explosion.setAttribute("href", "Explosion52.gif");
@@ -268,9 +301,6 @@ function handlePlayerHit(player, bullet) {
         }, 500);
     }
 }
-
-
-
 
 function updateBullets() {
     for (let i = bullets.length - 1; i >= 0; i--) {
@@ -311,8 +341,6 @@ const keys = {
     d: false,
 };
 
-
-
 document.addEventListener("keydown", (e) => {
     if (keys[e.key]) return; // Prevent repeated keydown events
     keys[e.key] = true;
@@ -320,9 +348,10 @@ document.addEventListener("keydown", (e) => {
     if (e.key === " ") {
         const now = Date.now();
         if (now - lastShotTime > FIRE_RATE) {
-            if (bulletDirection) { // Ensure a valid direction before shooting
+            if (bulletDirection) {
+                // Ensure a valid direction before shooting
                 console.log("Shooting bullet...");
-                lastShotTime = now;  // Update before shooting
+                lastShotTime = now; // Update before shooting
                 shootBullet();
             } else {
                 console.log("Cannot shoot: No bullet direction set!");
