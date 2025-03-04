@@ -6,8 +6,18 @@ body {
     text-align: center;
     height: 100vh;
     background-color: #222;
+    flex-direction: column;
   }
-  svg {
+
+svg {
     border: 2px solid #fff;
     background-color: #444;
-  }
+}
+
+.arena {
+  display: none;
+}
+
+.startGame {
+  display: none;
+}
