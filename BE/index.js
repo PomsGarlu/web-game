@@ -16,10 +16,10 @@ server.on("connection", (ws) => {
     const playerId = `player${playerCounter}`;
 
     let spawnPoints = [
-        { x: 1294, y: 50 },
-        { x: 50, y: 50 },
-        { x: 50, y: 718 },
-        { x: 1294, y: 718 },
+        { x: 1314, y: 30 },
+        { x: 30, y: 30 },
+        { x: 30, y: 708 },
+        { x: 1314, y: 708 },
     ];
 
     players[playerId] = {
@@ -49,6 +49,8 @@ server.on("connection", (ws) => {
         if (data.type === "move") {
             if (!players[data.playerId]) return; // Ensure player exists
 
+            players[data.playerId].x += data.x;
+            players[data.playerId].y += data.y;
             players[data.playerId].direction = data.direction;
 
             broadcast({
@@ -56,28 +58,10 @@ server.on("connection", (ws) => {
                 playerId: data.playerId,
                 direction: data.direction,
                 rotation: data.rotation,
-                x: players[data.playerId].x,
-                y: players[data.playerId].y,
-                addX: data.addX,
-                addY: data.addY,
+                x: data.x,
+                y: data.y,
                 players,
             });
-        }
-
-        if (data.type === "getLocation") {
-            let direction = data.direction;
-            let rotation = data.rotation;
-            let x = players[data.playerId].x;
-            let y = players[data.playerId].y;
-            let addX = data.addX;
-            let addY = data.addY;
-
-            ws.send(JSON.stringify({ type: "moveSelf", direction, rotation, x, y, addX, addY }));
-        }
-
-        if (data.type === "saveMove") {
-            players[playerId].x = data.x;
-            players[playerId].y = data.y;
         }
 
         if (data.type === "shoot") {

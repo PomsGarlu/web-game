@@ -8,8 +8,6 @@ let playerList = [];
 let playerId = null;
 let isLeader = false;
 let playerName = null;
-let currentLocationX = null;
-let currentLocationY = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     const nameForm = document.getElementById("nameForm");
@@ -63,12 +61,9 @@ ws.onmessage = (event) => {
         isLeader = true;
     }
 
-    if (data.type === "moveSelf") {
-        moveSelf(data.direction, data.rotation, data.x, data.y, data.addX, data.addY);
-    }
-
     if (data.type === "move") {
-        movePlayer(data.playerId, data.direction, data.rotation, data.x, data.y, data.addX, data.addY);
+        console.log(data.playerId, "move", data.direction);
+        movePlayer(data.playerId, data.direction, data.rotation, data.x, data.y);
     }
 
     if (data.type === "gameState" && data.players) {
@@ -90,10 +85,10 @@ ws.onmessage = (event) => {
         document.querySelectorAll("#arena image.player").forEach((player) => player.remove());
 
         const playerData = [
-            { href: "player1tank.png", x: 1294, y: 50 },
-            { href: "player2tank.png", x: 50, y: 50 },
-            { href: "player3tank.png", x: 50, y: 718 },
-            { href: "player4tank.png", x: 1294, y: 718 },
+            { href: "player1tank.png", x: 1314, y: 30 },
+            { href: "player2tank.png", x: 30, y: 30 },
+            { href: "player3tank.png", x: 30, y: 708 },
+            { href: "player4tank.png", x: 1314, y: 708 },
         ];
 
         players.forEach((player, index) => {
@@ -108,8 +103,6 @@ ws.onmessage = (event) => {
                 img.classList.add("player");
 
                 arena.appendChild(img);
-                currentLocationX = player.x;
-                currentLocationY = player.y;
             }
         });
 
@@ -165,24 +158,8 @@ document.addEventListener("keyup", (e) => {
     keys[e.key] = false;
 });
 
-function sendPlayerMove(addX, addY, direction, rotation) {
-    moveSelf(direction, rotation, addX, addY);
-    //ws.send(JSON.stringify({ type: "getLocation", playerId: playerId, addX, addY, direction, rotation }));
-    ws.send(JSON.stringify({ type: "move", playerId: playerId, addX, addY, direction, rotation }));
-}
-
-function moveSelf(direction, rotation, addX, addY) {
-    let newX = Math.max(0, Math.min(C.ARENA_SIZE_X - C.PLAYER_SIZE_X, currentLocationX + addX)); // Clamp x within arena
-    let newY = Math.max(0, Math.min(C.ARENA_SIZE_Y - C.PLAYER_SIZE_Y, currentLocationY + addY)); // Clamp y within arena
-
-    console.log(direction, rotation, addX, addY, "MOVE SELF");
-    let player = document.getElementById(playerId);
-    player.setAttribute("x", newX);
-    player.setAttribute("y", newY);
-    player.setAttribute("transform", `rotate(${rotation} ${newX + C.PLAYER_SIZE_X / 2} ${newY + C.PLAYER_SIZE_Y / 2})`);
-    currentLocationX = newX;
-    currentLocationY = newY;
-    ws.send(JSON.stringify({ type: "saveMove", x: newX, y: newY }));
+function sendPlayerMove(x, y, direction, rotation) {
+    ws.send(JSON.stringify({ type: "move", playerId: playerId, x, y, direction: direction, rotation: rotation }));
 }
 
 function updateLocalPlayer() {
@@ -208,15 +185,40 @@ function updateLocalPlayer() {
     }
 }
 
-function movePlayer(id, direction, rotation, dx, dy, addX, addY) {
-    if (id === playerId) {
-        return;
-    }
-    let newX = Math.max(0, Math.min(C.ARENA_SIZE_X - C.PLAYER_SIZE_X, dx + addX)); // Clamp x within arena
-    let newY = Math.max(0, Math.min(C.ARENA_SIZE_Y - C.PLAYER_SIZE_Y, dy + addY)); // Clamp y within arena
-
-    console.log(id, direction, rotation, dx, dy, addX, addY, "MOVE OTHERS");
+function movePlayer(id, direction, rotation, addX, addY) {
     let player = document.getElementById(id);
+    let currentX = parseFloat(player.getAttribute("x"));
+    let currentY = parseFloat(player.getAttribute("y"));
+
+    let newX = Math.max(0, Math.min(C.ARENA_SIZE_X - C.PLAYER_SIZE_X, currentX + addX)); // Clamp x within arena
+    let newY = Math.max(0, Math.min(C.ARENA_SIZE_Y - C.PLAYER_SIZE_Y, currentY + addY)); // Clamp y within arena
+
+    console.log(
+        "Direction: ",
+        direction,
+        "\n",
+        "Rotation: ",
+        rotation,
+        "\n",
+        "currentX: ",
+        currentX,
+        "\n",
+        "currentY: ",
+        currentY,
+        "\n",
+        "newX: ",
+        newX,
+        "\n",
+        "newY: ",
+        newY,
+        "\n",
+        "addX: ",
+        addX,
+        "\n",
+        "addY: ",
+        addY
+    );
+
     player.setAttribute("x", newX); // the player. is an SVG element
     player.setAttribute("y", newY); // the player. is an SVG element
     player.setAttribute("transform", `rotate(${rotation} ${newX + C.PLAYER_SIZE_X / 2} ${newY + C.PLAYER_SIZE_Y / 2})`); // Rotate player around its center
