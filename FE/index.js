@@ -42,6 +42,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+
+
 const lobby = document.getElementById("lobby");
 const arena = document.getElementById("arena");
 
@@ -76,9 +78,7 @@ ws.onmessage = (event) => {
 
     if (data.type === "gameStart") {
         console.log("GAME START!!!");
-
         let players = Object.values(data.players);
-
         lobby.style.display = "none";
         arena.style.display = "block";
 
@@ -101,7 +101,6 @@ ws.onmessage = (event) => {
                 img.setAttribute("y", player.y);
                 img.setAttribute("id", player.playerId);
                 img.classList.add("player");
-
                 arena.appendChild(img);
             }
         });
@@ -117,6 +116,8 @@ ws.onerror = (error) => {
 ws.onclose = () => {
     console.log("WebSocket connection closed");
 };
+
+
 
 function gameLoop() {
     updateLocalPlayer();

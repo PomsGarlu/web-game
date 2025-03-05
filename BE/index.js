@@ -6,6 +6,9 @@ let players = {};
 let gameRunning = false;
 let playerCounter = 0;
 
+
+
+
 server.on("connection", (ws) => {
     if (Object.keys(players).length >= 4) {
         ws.close();
