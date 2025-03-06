@@ -6,11 +6,6 @@ let players = {};
 let gameRunning = false;
 let playerCounter = 0;
 
-
-
-
-
-
 server.on("connection", (ws) => {
     if (Object.keys(players).length >= 4) {
         ws.close();
@@ -38,9 +33,6 @@ server.on("connection", (ws) => {
     };
 
     ws.send(JSON.stringify({ type: "assignPlayerId", playerId }));
-    if (Object.keys(players).length === 1) {
-        ws.send(JSON.stringify({ type: "youAreLeader" }));
-    }
 
     broadcastLobby();
 
@@ -49,6 +41,7 @@ server.on("connection", (ws) => {
 
         if (data.type === "selectName") {
             players[playerId].name = data.name;
+            broadcastLobby();
         }
 
         if (data.type === "move") {
@@ -70,7 +63,7 @@ server.on("connection", (ws) => {
         }
 
         if (data.type === "shoot") {
-            broadcast({ type: "shoot", playerId });
+            broadcast({ type: "shoot", playerId: data.playerId, direction: data.direction });
         }
 
         if (data.type === "startGame") {
