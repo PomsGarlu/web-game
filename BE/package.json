@@ -4,7 +4,8 @@
   "description": "backend for a demo game ",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "start": "node server.js"
   },
   "author": "KMH",
   "license": "ISC",
