@@ -1,4 +1,4 @@
-const ws = new WebSocket("ws://localhost:8080");
+const ws = new WebSocket("wss://https://web-game-qd65.onrender.com");
 import { C } from "./src/constants.js";
 const bullets = []; // Array to store active bullets
 let lastShotTime = 0;
