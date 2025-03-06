@@ -26,18 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
             playerName += playerId[i];
         }
         nameForm.style.display = "none";
-        if (isLeader) {
-            waitingMessage.textContent = `Your name is set as ${playerName} and you are the lobby leader.`;
-        } else {
-            waitingMessage.textContent = `Your name is set as ${playerName}. Waiting for the lobby leader to start the game.`;
-        }
 
         ws.send(JSON.stringify({ type: "selectName", name: playerName }));
-        if (isLeader) {
-            startButton.style.display = "block";
-        } else {
-            startButton.style.display = "none";
-        }
     };
 
     startButton.addEventListener("click", () => {
@@ -80,9 +70,31 @@ ws.onmessage = (event) => {
             .filter((name) => name !== null && name !== undefined);
 
         playerIdList = Object.keys(data.players);
-        if (playerIdList.length === 1) {
+        if (playerIdList[0] === playerId) {
             isLeader = true;
         }
+
+        if (isLeader) {
+            startButton.style.display = "block";
+        } else {
+            startButton.style.display = "none";
+        }
+
+        if (isLeader) {
+            if (playerName) {
+                waitingMessage.textContent = `Your name is set as ${playerName} and you are the lobby leader.`;
+            } else {
+                waitingMessage.textContent = `You are the lobby leader. Please set your name!`;
+            }
+        } else {
+            if (playerName) {
+                waitingMessage.textContent = `Your name is set as ${playerName}. Waiting for the lobby leader to start the game.`;
+            } else {
+                waitingMessage.textContent = `Please set your name!`;
+            }
+        }
+
+        console.log("playerIdList:", playerIdList);
         playersInLobby.textContent = `Connected players: ${playerIdList.length}`;
     }
 

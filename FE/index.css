@@ -9,6 +9,16 @@ body {
     flex-direction: column;
   }
 
+#lobby {
+    display: flex;
+    justify-content: center; /* Horizontal center */
+    align-items: center; /* Vertical center */
+    height: 100vh; /* Optional: Makes it take full screen height */
+    flex-direction: column; /* Optional: Stack items vertically */
+    text-align: center; /* Optional: Center text inside */
+}
+
+
 svg {
     border: 2px solid #fff;
     background-color: #444;
