@@ -1,3 +1,5 @@
+// Move all player related actions here.
+
 // const player = document.getElementById('player');
 
 // const PLAYER_SIZE = 64; // Player dimensions

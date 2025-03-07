@@ -10,8 +10,6 @@ let duration = 10 * 60 * 1000; // 10 minutes
 /** @type {boolean} */
 export let isPaused = false; // check if this is paused in the game loop.
 
-
-
 /**
  * Get the current time in milliseconds.
  * @returns {number}

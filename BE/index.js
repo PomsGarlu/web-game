@@ -7,6 +7,14 @@ let players = {};
 let gameRunning = false;
 let playerCounter = 0;
 
+// on connection login
+// join game
+// create game
+// update game
+
+
+
+
 server.on("connection", (ws) => {
     if (Object.keys(players).length >= 4) {
         ws.close();
@@ -34,13 +42,14 @@ server.on("connection", (ws) => {
     };
 
     ws.send(JSON.stringify({ type: "assignPlayerId", playerId }));
-
     broadcastLobby();
 
     ws.on("message", (message) => {
         const data = JSON.parse(message);
 
+            // should add player to the game
         if (data.type === "selectName") {
+            console.log("data");
             players[playerId].name = data.name;
             broadcastLobby();
         }
@@ -59,7 +68,7 @@ server.on("connection", (ws) => {
                 rotation: data.rotation,
                 x: data.x,
                 y: data.y,
-                players,
+                players: getPlayersWithoutWs(),
             });
         }
 
@@ -69,8 +78,13 @@ server.on("connection", (ws) => {
 
         if (data.type === "startGame") {
             gameRunning = true;
-            broadcast({ type: "gameStart", players });
+            broadcast({ type: "gameStart", players: getPlayersWithoutWs() });
         }
+    });
+
+    ws. on("login", (data) => {
+    
+
     });
 
     ws.on("close", () => {
@@ -78,9 +92,16 @@ server.on("connection", (ws) => {
         delete players[playerId];
         broadcastLobby();
     });
+
+    //TODO: broadcastStatus 
+    //TODO: broadcastTimer or Add to already existing broadcast stuff.
+
 });
 
+
+
 function broadcast(data) {
+    console.log("data sent to the front", data);
     server.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify(data));
@@ -89,5 +110,18 @@ function broadcast(data) {
 }
 
 function broadcastLobby() {
-    broadcast({ type: "gameState", players });
+    broadcast({ type: "gameState", players:getPlayersWithoutWs() });
+}
+
+// function broadcastGame() {
+//     broadcast({ type: "gameState", players: getPlayersWithoutWs() });
+// }
+
+function getPlayersWithoutWs() {
+    const playersWithoutWs = {};
+    for (const playerId in players) {
+        const { ws, ...playerData } = players[playerId];
+        playersWithoutWs[playerId] = playerData;
+    }
+    return playersWithoutWs;
 }
