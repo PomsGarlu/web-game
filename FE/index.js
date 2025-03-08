@@ -9,6 +9,7 @@ import {
   inMenu,
   setGameStatus,
 } from "./elements/game.js";
+import { displayHUD } from "./elements/hud.js";
 
 // Menu controlls
 
@@ -25,13 +26,16 @@ let playerName = null;
 let players = [];
 let playerElements = [];
 let startButton = document.getElementById("startGame");
+let arena = document.getElementById("arena");
 
 
 document.addEventListener("DOMContentLoaded", () => {
   displayMenu();
+  displayHUD();
   const nameForm = document.getElementById("nameForm");
   const nameInput = document.getElementById("nameInput");
   const waitingMessage = document.getElementById("waitingMessage");
+  arena = document.getElementById("arena");
   startButton = document.getElementById("startGame");
   nameForm.onclick = (e) => {
     console.log("nameForm submitted");
@@ -65,8 +69,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+
+
+
 const lobby = document.getElementById("lobby"); // TODO: moved to menu.js
-const arena = document.getElementById("arena");
+
 
 ws.onopen = () => {
   console.log("WebSocket connection established");
@@ -127,16 +134,20 @@ ws.onmessage = (event) => {
     console.log("GAME START!!!");
     setGameStatus("game");
     if (gameRunning) {
-      displayGame(); // do we need to call it only once ?
+      displayGame(); 
     }
+
     let players = Object.values(data.players);
-    // HS disabled to check if the elements toggle works.
+    console.log("Players:", players);
+
     // lobby.style.display = "none";
     // arena.style.display = "block";
-
+    const playersTest = document.querySelectorAll("#arena image.player"); // this is empty
+    console.log("Testing the goods", playersTest);
+ 
     document
       .querySelectorAll("#arena image.player")
-      .forEach((player) => player.remove());
+      .forEach((player) => player.remove()); // this is empty so nothing happens 
 
     const playerData = [
       { href: "player1tank.png", x: 1314, y: 30 },
@@ -158,6 +169,7 @@ ws.onmessage = (event) => {
         img.setAttribute("y", player.y);
         img.setAttribute("id", player.playerId);
         img.classList.add("player");
+        console.log("Player", img);
 
         if (playerId === player.playerId) {
           if (playerData[index].href === "player1tank.png") {
@@ -174,6 +186,14 @@ ws.onmessage = (event) => {
           }
         }
 
+        arena = document.getElementById("arena");
+        if(arena) { 
+          console.log("Arena exists");
+          arena.appendChild(img);
+        } else {
+          console.log("Arena does not exist");
+        }
+       
         arena.appendChild(img);
       }
     });
@@ -192,7 +212,6 @@ ws.onmessage = (event) => {
 
   // The booleans for this need to be triggered
   console.log("is triggered");
-  displayGame();
 };
 
 ws.onerror = (error) => {
