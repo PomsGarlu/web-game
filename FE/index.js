@@ -12,11 +12,18 @@ import {
 import { displayHUD } from "./elements/hud.js";
 
 const bulletShot = new Audio("shell_shot.wav");
-bulletShot.volume = 0.0;
+bulletShot.volume = 0.1;
 const bulletExplosion = new Audio("shell_exp.wav");
 bulletExplosion.volume = 1;
 const tankExplosion = new Audio("tank_exp.wav");
 tankExplosion.volume = 0.1;
+
+const obstacles = [
+  { x: 700, y: 250, width: 75, height: 75, image: 'rock_1.png' }, 
+  { x: 220, y: 70, width: 100, height: 100, image: 'rock_2.png' },
+  { x: 330, y: 500, width: 200, height: 210, image: 'rock_3.png' },
+  { x: 1000, y: 60, width: 225, height: 150, image: 'rock_4.png' }
+];
 
 // Create an audio element for ambient sound
 const ambientSound = new Audio("ambient.wav"); // Replace with your actual file path
@@ -30,11 +37,29 @@ window.addEventListener("load", () => {
 
 document.addEventListener("click", () => {
   if (ambientSound.paused) {
-      ambientSound.play();
+    ambientSound.play().catch(error => console.log("Audio playback error:", error));
   }
 });
 
+function displayObstacles() {
+  const arena = document.getElementById("arena");
+  
+  obstacles.forEach(obstacle => {
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("x", obstacle.x);
+    rect.setAttribute("y", obstacle.y);
+    rect.setAttribute("width", obstacle.width);
+    rect.setAttribute("height", obstacle.height);
+    rect.setAttribute("fill", "gray"); // Change color as needed
+    rect.classList.add("obstacle"); // Assign class for easy access later
+
+    arena.appendChild(rect);
+  });
+}
+
 // Menu controlls
+
+
 
 const bullets = []; // Array to store active bullets
 let lastShotTime = 0;
@@ -159,6 +184,8 @@ ws.onmessage = (event) => {
     if (gameRunning) {
       displayGame(); 
     }
+
+    displayObstacles();
 
     let players = Object.values(data.players);
     console.log("Players:", players);
@@ -302,6 +329,15 @@ document.addEventListener("keyup", (e) => {
   keys[e.key] = false;
 });
 
+function isColliding(x, y, width, height) {
+  return obstacles.some(obstacle => 
+    x < obstacle.x + obstacle.width &&
+    x + width > obstacle.x &&
+    y < obstacle.y + obstacle.height &&
+    y + height > obstacle.y
+  );
+}
+
 // Send player movement to the BE
 function sendPlayerMove(x, y, direction, rotation) {
   ws.send(
@@ -360,7 +396,6 @@ function updateLocalPlayer() {
   }
 }
 
-// Move the player on the FE
 function movePlayer(id, direction, rotation, addX, addY) {
   let player = document.getElementById(id);
   if (id === playerId) {
@@ -369,49 +404,20 @@ function movePlayer(id, direction, rotation, addX, addY) {
   let currentX = parseFloat(player.getAttribute("x"));
   let currentY = parseFloat(player.getAttribute("y"));
 
-  let newX = Math.max(
-    0,
-    Math.min(C.ARENA_SIZE_X - C.PLAYER_SIZE_X, currentX + addX)
-  ); // Clamp x within arena
-  let newY = Math.max(
-    0,
-    Math.min(C.ARENA_SIZE_Y - C.PLAYER_SIZE_Y, currentY + addY)
-  ); // Clamp y within arena
+  let newX = Math.max(0, Math.min(C.ARENA_SIZE_X - C.PLAYER_SIZE_X, currentX + addX));
+  let newY = Math.max(0, Math.min(C.ARENA_SIZE_Y - C.PLAYER_SIZE_Y, currentY + addY));
 
-  console.log(
-    "Direction: ",
-    direction,
-    "\n",
-    "Rotation: ",
-    rotation,
-    "\n",
-    "currentX: ",
-    currentX,
-    "\n",
-    "currentY: ",
-    currentY,
-    "\n",
-    "newX: ",
-    newX,
-    "\n",
-    "newY: ",
-    newY,
-    "\n",
-    "addX: ",
-    addX,
-    "\n",
-    "addY: ",
-    addY
-  );
-
-  player.setAttribute("x", newX); // the player. is an SVG element
-  player.setAttribute("y", newY); // the player. is an SVG element
-  player.setAttribute(
-    "transform",
-    `rotate(${rotation} ${newX + C.PLAYER_SIZE_X / 2} ${
-      newY + C.PLAYER_SIZE_Y / 2
-    })`
-  ); // Rotate player around its center
+  // **Check if the new position collides with an obstacle**
+  if (!isColliding(newX, newY, C.PLAYER_SIZE_X, C.PLAYER_SIZE_Y)) {
+    player.setAttribute("x", newX);
+    player.setAttribute("y", newY);
+    player.setAttribute(
+      "transform",
+      `rotate(${rotation} ${newX + C.PLAYER_SIZE_X / 2} ${newY + C.PLAYER_SIZE_Y / 2})`
+    );
+  } else {
+    console.log("Collision detected! Movement blocked.");
+  }
 }
 
 // Send bullet data to the BE
@@ -554,6 +560,18 @@ function shootBullet(pId, direction) {
     bullet.setAttribute("x", bulletX);
     bullet.setAttribute("y", bulletY);
 
+      // Check for obstacle collision
+  if (isColliding(bulletData.x, bulletData.y, 10, 14)) {
+    console.log("Bullet hit an obstacle!");
+    
+    // Play bullet explosion sound
+    bulletExplosion.currentTime = 0;
+    bulletExplosion.play().catch(error => console.log("Audio playback error:", error));
+
+    bulletData.element.remove();
+    return;
+  }
+
     // Keep the rotation while moving
     bullet.setAttribute(
       "transform",
@@ -674,6 +692,21 @@ function updateBullets() {
     let bullet = bullets[i];
     bullet.x += bullet.vx;
     bullet.y += bullet.vy;
+
+    // **Check if the bullet collides with an obstacle**
+    if (isColliding(newX, newY, 10, 14)) {  // Bullet size is 10x14
+      console.log("Bullet hit an obstacle!");
+      
+      // **Remove the bullet**
+      bullet.element.remove();
+      bullets.splice(index, 1);
+
+      // **Play explosion sound**
+      bulletExplosion.currentTime = 0;
+      bulletExplosion.play().catch(error => console.log("Audio playback error:", error));
+      
+      return;
+    }
 
     bullet.element.setAttribute("x", bullet.x);
     bullet.element.setAttribute("y", bullet.y);
