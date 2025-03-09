@@ -11,6 +11,29 @@ import {
 } from "./elements/game.js";
 import { displayHUD } from "./elements/hud.js";
 
+const bulletShot = new Audio("shell_shot.wav");
+bulletShot.volume = 0.0;
+const bulletExplosion = new Audio("shell_exp.wav");
+bulletExplosion.volume = 1;
+const tankExplosion = new Audio("tank_exp.wav");
+tankExplosion.volume = 0.1;
+
+// Create an audio element for ambient sound
+const ambientSound = new Audio("ambient.wav"); // Replace with your actual file path
+ambientSound.loop = true; // Ensure the sound loops continuously
+ambientSound.volume = 0.05; // Adjust volume (0.0 to 1.0)
+
+// Start playing ambient sound when the game loads
+window.addEventListener("load", () => {
+  ambientSound.play().catch(error => console.log("Audio playback error:", error));
+});
+
+document.addEventListener("click", () => {
+  if (ambientSound.paused) {
+      ambientSound.play();
+  }
+});
+
 // Menu controlls
 
 const bullets = []; // Array to store active bullets
@@ -402,6 +425,10 @@ function shootBullet(pId, direction) {
     ws.send(JSON.stringify({ type: "shoot", playerId, direction }));
   }
 
+    // Play the bullet shot sound
+    bulletShot.currentTime = 0; // Reset sound to allow rapid firing
+    bulletShot.play().catch(error => console.log("Audio playback error:", error));
+
   const player = document.getElementById(pId);
 
   // Create bullet to the SVG arena
@@ -601,6 +628,7 @@ function handlePlayerHit(player, bullet) {
     tankExplosion.setAttribute("href", "Explosion53.gif");
     tankExplosion.setAttribute("width", "100"); // Adjust size as needed
     tankExplosion.setAttribute("height", "100");
+    tankExplosion.play();
 
     // Center explosion on tank
     const tankX = player.x.baseVal.value - 25; // Offset to center
@@ -629,6 +657,7 @@ function handlePlayerHit(player, bullet) {
     explosion.setAttribute("height", "52");
     explosion.setAttribute("x", explosionX);
     explosion.setAttribute("y", explosionY);
+    bulletExplosion.play()
 
     // Add explosion to the arena
     document.getElementById("arena").appendChild(explosion);
