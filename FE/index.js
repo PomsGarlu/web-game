@@ -241,6 +241,10 @@ ws.onmessage = (event) => {
 
     if (data.type === "nextRound") {
         //TODO: implement starting the next round
+        for (let bullet of bullets) {
+            bullet.element.remove();
+        }
+        bullets.length = 0;
         players = Object.values(data.players);
         isRoundOver = true;
     }
