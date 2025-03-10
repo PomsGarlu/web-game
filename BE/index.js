@@ -12,9 +12,6 @@ let playerCounter = 0;
 // create game
 // update game
 
-
-
-
 server.on("connection", (ws) => {
     if (Object.keys(players).length >= 4) {
         ws.close();
@@ -47,11 +44,15 @@ server.on("connection", (ws) => {
     ws.on("message", (message) => {
         const data = JSON.parse(message);
 
-            // should add player to the game
+        // should add player to the game
         if (data.type === "selectName") {
             console.log("data");
             players[playerId].name = data.name;
             broadcastLobby();
+        }
+
+        if (data.type === "startNextRound") {
+            broadcast({ type: "nextRound", players: getPlayersWithoutWs() });
         }
 
         if (data.type === "move") {
@@ -82,10 +83,7 @@ server.on("connection", (ws) => {
         }
     });
 
-    ws. on("login", (data) => {
-    
-
-    });
+    ws.on("login", (data) => {});
 
     ws.on("close", () => {
         console.log("Player Disconnected");
@@ -93,12 +91,9 @@ server.on("connection", (ws) => {
         broadcastLobby();
     });
 
-    //TODO: broadcastStatus 
+    //TODO: broadcastStatus
     //TODO: broadcastTimer or Add to already existing broadcast stuff.
-
 });
-
-
 
 function broadcast(data) {
     console.log("data sent to the front", data);
@@ -110,7 +105,7 @@ function broadcast(data) {
 }
 
 function broadcastLobby() {
-    broadcast({ type: "gameState", players:getPlayersWithoutWs() });
+    broadcast({ type: "gameState", players: getPlayersWithoutWs() });
 }
 
 // function broadcastGame() {

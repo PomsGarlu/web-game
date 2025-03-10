@@ -1,7 +1,6 @@
 import { inMenu } from "./game.js";
 
-const content =  
-`
+const content = `
 <div id="lobby">
   <h1>TANKS</h1>
   <form id="nameForm">
@@ -12,14 +11,17 @@ const content =
   <h3 id="playersInLobby"></h3>
   <button type="submit" id="startGame" class="startGame">Start Game</button>
   <!-- SVG Arena -->
-</div>`
+</div>`;
 
 export function displayMenu() {
-  var menu = document.getElementById("menu");
-  //   console.log("We are creating the menu");
-  //   console.log("In Menu: " + inMenu);
-  //   console.log (inMenu);
-  menu.innerHTML = !inMenu
-    ? "No lobby exists"
-    : content;
+    var menu = document.getElementById("menu");
+    //   console.log("We are creating the menu");
+    //   console.log("In Menu: " + inMenu);
+    //   console.log (inMenu);
+    menu.innerHTML = !inMenu ? "No lobby exists" : content;
+}
+
+export function hideMenu() {
+    var menu = document.getElementById("menu");
+    menu.innerHTML = "";
 }
