@@ -1,0 +1,13 @@
+todo -> toggle of different modes from the front end.
+todo ->  
+todo  -> timer
+todo  -> Main menu
+        ->Loby 
+todo  -> Pause Menu  
+            --> Restart 
+            --> exist
+            -->
+todo  -> Game Over screen
+
+Graphics
+

@@ -362,11 +362,11 @@ document.addEventListener("keydown", (e) => {
         // setGameStatus("pause");
     }
     if (e.key === "r") {
-        // setGameStatus("game");
+        setGameStatus("game");
     }
     // M to go to the menu ( should be removed for prod.)
     if (e.key === "m") {
-        // setGameStatus("menu");
+        setGameStatus("menu");
     }
     if (e.key === "g") {
         // setGameStatus("game");
