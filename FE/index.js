@@ -12,10 +12,16 @@ const tankExplosion = new Audio("tank_exp.wav");
 tankExplosion.volume = 0.1;
 
 const obstacles = [
-    { x: 700, y: 250, width: 75, height: 75, image: "rock_1.png" },
-    { x: 220, y: 70, width: 100, height: 100, image: "rock_2.png" },
-    { x: 330, y: 500, width: 200, height: 210, image: "rock_3.png" },
-    { x: 1000, y: 60, width: 175, height: 150, image: "rock_4.png" },
+    { x: 700, y: 230, width: 71.2, height: 100, image: "rock_1.png" },
+    { x: 220, y: 70, width: 96.6, height: 121.65, image: "rock_2.png" },
+    { x: 320, y: 480, width: 223.5, height: 235.5, image: "rock_3.png" },
+    { x: 1000, y: 40, width: 150, height: 150, image: "rock_4.png" },
+    { x: 1095, y: 250, width: 65, height: 85, image: "" },
+    { x: 854, y: 477, width: 50, height: 70, image: "" },
+    { x: 695, y: 633, width: 100, height: 35, image: "" },
+    { x: 940, y: 712, width: 135, height: 40, image: "" },
+    { x: 1048, y: 585, width: 115, height: 30, image: "" },
+    { x: 370, y: 306, width: 40, height: 35, image: "" },
 ];
 
 // Create an audio element for ambient sound
@@ -74,7 +80,6 @@ let isRoundOver = false;
 
 document.addEventListener("DOMContentLoaded", () => {
     displayMenu();
-    displayHUD();
     const nameForm = document.getElementById("nameForm");
     const nameInput = document.getElementById("nameInput");
     const waitingMessage = document.getElementById("waitingMessage");
@@ -145,14 +150,14 @@ ws.onmessage = (event) => {
         if (isLeader) {
             if (playerName) {
                 waitingMessage.textContent = `Your name is set as ${playerName} and you are the lobby leader.`;
-                updateHUD(null, 100, null, playerName);
+                //updateHUD(null, 100, null, playerName);
             } else {
                 waitingMessage.textContent = `You are the lobby leader. Please set your name!`;
             }
         } else {
             if (playerName) {
                 waitingMessage.textContent = `Your name is set as ${playerName}. Waiting for the lobby leader to start the game.`;
-                updateHUD(null, 100, null, playerName);
+                //updateHUD(null, 100, null, playerName);
             } else {
                 waitingMessage.textContent = `Please set your name!`;
             }
@@ -168,6 +173,7 @@ ws.onmessage = (event) => {
         if (gameRunning) {
             hideMenu();
             displayGame();
+            displayHUD();
             updateHUD(score, 100, null, playerName);
         }
 
@@ -523,6 +529,7 @@ function shootBullet(pId, direction) {
 
     // Create bullet to the SVG arena
     const bullet = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    const explosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
 
     let bulletImage = bulletImg;
 
