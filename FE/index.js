@@ -27,7 +27,7 @@ const obstacles = [
 // Create an audio element for ambient sound
 const ambientSound = new Audio("ambient.wav"); // Replace with your actual file path
 ambientSound.loop = true; // Ensure the sound loops continuously
-ambientSound.volume = 0.0; // Adjust volume (0.0 to 1.0)
+ambientSound.volume = 0.03; // Adjust volume (0.0 to 1.0)
 
 // Start playing ambient sound when the game loads
 window.addEventListener("load", () => {
