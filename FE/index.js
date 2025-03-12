@@ -1,4 +1,4 @@
-const ws = new WebSocket("wss://web-game-qd65.onrender.com");
+const ws = new WebSocket("wss://be-thrumming-pine-8775.fly.dev"); //render: wss://web-game-qd65.onrender.com
 import { C } from "./src/constants.js";
 import { displayMenu, hideMenu } from "./elements/menu.js";
 import { displayGame, gameOver, gamePaused, gameRunning, inMenu, setGameStatus } from "./elements/game.js";

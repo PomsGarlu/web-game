@@ -1,7 +1,12 @@
-const { connection } = require("websocket");
+const http = require("http");
 const WebSocket = require("ws");
-const port = process.env.PORT || 8080;
-const server = new WebSocket.Server({ port });
+
+const port = process.env.PORT || 3000;
+//next 2 lines are for fly.dev
+const httpServer = http.createServer(); // Create an HTTP server
+const server = new WebSocket.Server({ server: httpServer }); // Attach WebSocket to HTTP server
+
+//const server = new WebSocket.Server({ port });
 
 let players = {};
 let gameRunning = false;
@@ -120,3 +125,8 @@ function getPlayersWithoutWs() {
     }
     return playersWithoutWs;
 }
+
+//for fly
+httpServer.listen(port, "0.0.0.0", () => {
+    console.log(`WebSocket server running on port ${port}`);
+});

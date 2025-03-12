@@ -14,5 +14,8 @@
     "node.js": "^0.0.1-security",
     "websocket": "^1.0.35",
     "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "@flydotio/dockerfile": "^0.7.8"
   }
 }
