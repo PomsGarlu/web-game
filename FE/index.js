@@ -1,4 +1,4 @@
-const ws = new WebSocket("ws://localhost:8080");
+const ws = new WebSocket("ws://web-game-qd65.onrender.com");
 import { C } from "./src/constants.js";
 import { displayMenu, hideMenu } from "./elements/menu.js";
 import { displayGame, gameOver, gamePaused, gameRunning, inMenu, setGameStatus } from "./elements/game.js";
