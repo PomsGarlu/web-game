@@ -6,18 +6,18 @@ import { displayHUD, updateHUD } from "./elements/hud.js";
 import { setScoreboard, displayScoreboard, updateScoreboard } from "./elements/scoreboard.js";
 import { displayPause, removePause } from "./elements/pause.js";
 
-const bulletShot = new Audio("shell_shot.wav");
+const bulletShot = new Audio("./audio/shell_shot.wav");
 bulletShot.volume = 0.1;
-const bulletExplosion = new Audio("shell_exp.wav");
+const bulletExplosion = new Audio("./audio/shell_exp.wav");
 bulletExplosion.volume = 1;
-const tankExplosion = new Audio("tank_exp.wav");
+const tankExplosion = new Audio("./audio/tank_exp.wav");
 tankExplosion.volume = 0.1;
 
 const obstacles = [
-    { x: 700, y: 230, width: 71.2, height: 100, image: "rock_1.png" },
-    { x: 220, y: 70, width: 96.6, height: 121.65, image: "rock_2.png" },
-    { x: 320, y: 480, width: 223.5, height: 235.5, image: "rock_3.png" },
-    { x: 1000, y: 40, width: 150, height: 150, image: "rock_4.png" },
+    { x: 700, y: 230, width: 71.2, height: 100, image: "./images/rock_1.png" },
+    { x: 220, y: 70, width: 96.6, height: 121.65, image: "./images/rock_2.png" },
+    { x: 320, y: 480, width: 223.5, height: 235.5, image: "./images/rock_3.png" },
+    { x: 1000, y: 40, width: 150, height: 150, image: "./images/rock_4.png" },
     { x: 1095, y: 250, width: 65, height: 85, image: "" },
     { x: 854, y: 477, width: 50, height: 70, image: "" },
     { x: 695, y: 633, width: 100, height: 35, image: "" },
@@ -27,7 +27,7 @@ const obstacles = [
 ];
 
 // Create an audio element for ambient sound
-const ambientSound = new Audio("ambient.wav"); // Replace with your actual file path
+const ambientSound = new Audio("./audio/ambient.wav"); // Replace with your actual file path
 ambientSound.loop = true; // Ensure the sound loops continuously
 ambientSound.volume = 0.03; // Adjust volume (0.0 to 1.0)
 
@@ -210,10 +210,10 @@ ws.onmessage = (event) => {
         // arena.style.display = "block";
 
         const playerData = [
-            { href: "player1tank.png", x: 1314, y: 30 },
-            { href: "player2tank.png", x: 30, y: 30 },
-            { href: "player3tank.png", x: 30, y: 708 },
-            { href: "player4tank.png", x: 1314, y: 708 },
+            { href: "./images/player1tank.png", x: 1314, y: 30 },
+            { href: "./images/player2tank.png", x: 30, y: 30 },
+            { href: "./images/player3tank.png", x: 30, y: 708 },
+            { href: "./images/player4tank.png", x: 1314, y: 708 },
         ];
 
         playersAlive = 0;
@@ -231,17 +231,17 @@ ws.onmessage = (event) => {
                 //console.log("Player", img);
 
                 if (playerId === player.playerId) {
-                    if (playerData[index].href === "player1tank.png") {
-                        bulletImg = "bullet1.png";
+                    if (playerData[index].href === "./images/player1tank.png") {
+                        bulletImg = "./images/bullet1.png";
                     }
-                    if (playerData[index].href === "player2tank.png") {
-                        bulletImg = "bullet2.png";
+                    if (playerData[index].href === "./images/player2tank.png") {
+                        bulletImg = "./images/bullet2.png";
                     }
-                    if (playerData[index].href === "player3tank.png") {
-                        bulletImg = "bullet3.png";
+                    if (playerData[index].href === "./images/player3tank.png") {
+                        bulletImg = "./images/bullet3.png";
                     }
-                    if (playerData[index].href === "player4tank.png") {
-                        bulletImg = "bullet4.png";
+                    if (playerData[index].href === "./images/player4tank.png") {
+                        bulletImg = "./images/bullet4.png";
                     }
                 }
 
@@ -307,10 +307,10 @@ function startNextRound() {
     health = 100;
 
     const playerData = [
-        { href: "player1tank.png", x: 1314, y: 30 },
-        { href: "player2tank.png", x: 30, y: 30 },
-        { href: "player3tank.png", x: 30, y: 708 },
-        { href: "player4tank.png", x: 1314, y: 708 },
+        { href: "./images/player1tank.png", x: 1314, y: 30 },
+        { href: "./images/player2tank.png", x: 30, y: 30 },
+        { href: "./images/player3tank.png", x: 30, y: 708 },
+        { href: "./images/player4tank.png", x: 1314, y: 708 },
     ];
 
     playersAlive = 0;
@@ -328,17 +328,17 @@ function startNextRound() {
             //console.log("Player", img);
 
             if (playerId === player.playerId) {
-                if (playerData[index].href === "player1tank.png") {
-                    bulletImg = "bullet1.png";
+                if (playerData[index].href === "./images/player1tank.png") {
+                    bulletImg = "./images/bullet1.png";
                 }
-                if (playerData[index].href === "player2tank.png") {
-                    bulletImg = "bullet2.png";
+                if (playerData[index].href === "./images/player2tank.png") {
+                    bulletImg = "./images/bullet2.png";
                 }
-                if (playerData[index].href === "player3tank.png") {
-                    bulletImg = "bullet3.png";
+                if (playerData[index].href === "./images/player3tank.png") {
+                    bulletImg = "./images/bullet3.png";
                 }
-                if (playerData[index].href === "player4tank.png") {
-                    bulletImg = "bullet4.png";
+                if (playerData[index].href === "./images/player4tank.png") {
+                    bulletImg = "./images/bullet4.png";
                 }
             }
 
@@ -566,17 +566,17 @@ function shootBullet(pId, direction) {
         let tankImage = player.getAttribute("href");
         //console.log(tankImage);
         switch (tankImage) {
-            case "player1tank.png":
-                bulletImage = "bullet1.png";
+            case "./images/player1tank.png":
+                bulletImage = "./images/bullet1.png";
                 break;
-            case "player2tank.png":
-                bulletImage = "bullet2.png";
+            case "./images/player2tank.png":
+                bulletImage = "./images/bullet2.png";
                 break;
-            case "player3tank.png":
-                bulletImage = "bullet3.png";
+            case "./images/player3tank.png":
+                bulletImage = "./images/bullet3.png";
                 break;
-            case "player4tank.png":
-                bulletImage = "bullet4.png";
+            case "./images/player4tank.png":
+                bulletImage = "./images/bullet4.png";
                 break;
         }
     }
@@ -684,7 +684,7 @@ function shootBullet(pId, direction) {
             const explosionY = bulletY - 26;
 
             // Use normal explosion for non-lethal hits (Bullet impact)
-            explosion.setAttribute("href", "Explosion52.gif");
+            explosion.setAttribute("href", "./images/Explosion52.gif");
             explosion.setAttribute("width", "52");
             explosion.setAttribute("height", "52");
             explosion.setAttribute("x", explosionX);
@@ -775,7 +775,7 @@ function handlePlayerHit(player, bullet) {
 
         // Use "Explosion53.gif" for destroyed tanks
         const tankExplosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
-        tankExplosion.setAttribute("href", "Explosion53.gif");
+        tankExplosion.setAttribute("href", "./images/Explosion53.gif");
         tankExplosion.setAttribute("width", "100"); // Adjust size as needed
         tankExplosion.setAttribute("height", "100");
         //tankExplosion.play();
@@ -812,7 +812,7 @@ function handlePlayerHit(player, bullet) {
         }, 800);
     } else {
         // Use normal explosion for non-lethal hits (Bullet impact)
-        explosion.setAttribute("href", "Explosion52.gif");
+        explosion.setAttribute("href", "./images/Explosion52.gif");
         explosion.setAttribute("width", "52");
         explosion.setAttribute("height", "52");
         explosion.setAttribute("x", explosionX);

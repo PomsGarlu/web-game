@@ -1,5 +1,3 @@
-import { inMenu } from "./game.js";
-
 const content = `
 <div id="lobby">
   <h1>TANKS</h1>
@@ -18,7 +16,7 @@ export function displayMenu() {
     //   console.log("We are creating the menu");
     //   console.log("In Menu: " + inMenu);
     //   console.log (inMenu);
-    menu.innerHTML = !inMenu ? "No lobby exists" : content;
+    menu.innerHTML = content;
 }
 
 export function hideMenu() {
