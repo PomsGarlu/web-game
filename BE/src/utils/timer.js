@@ -6,9 +6,10 @@
 let elapseTime = 0; // in milliseconds
 let pauseStartTime = 0; // in milliseconds
 let startTime = 0; // in milliseconds
-let duration = 10 * 60 * 1000; // 10 minutes
+let duration = 2 * 60 * 1000; // 10 minutes
 /** @type {boolean} */
-export let isPaused = false; // check if this is paused in the game loop.
+
+let isPaused = false; // check if this is paused in the game loop.
 
 /**
  * Get the current time in milliseconds.
@@ -19,7 +20,7 @@ function getTimeNow() {
   return new Date().getTime();
 }
 
-export function pauseTimer() {
+function pauseTimer() {
   if (isPaused) {
     return;
   }
@@ -28,7 +29,7 @@ export function pauseTimer() {
   startTime = 0;
 }
 
-export function resumeTimer() {
+function resumeTimer() {
   if (!isPaused) {
     return;
   }
@@ -38,19 +39,19 @@ export function resumeTimer() {
 }
 
 // restarts the timer sets start to now erases all values
-export function resetTimer() {
+function resetTimer() {
   startTime = getTimeNow();
   elapseTime = 0;
 }
 
-export function stopTimer() {
+function stopTimer() {
   isPaused = false; // hard reset for the Pause should be done externally, but this is a safety measure.
   elapseTime = 0;
   pauseStartTime = 0;
   startTime = 0;
 }
 
-export function startTimer() {
+function startTimer() {
   isPaused = false; // hard reset for the Pause should be done externally, but this is a safety measure.
   startTime = getTimeNow();
 }
@@ -59,7 +60,7 @@ export function startTimer() {
  * Get the elapsed time in milliseconds.
  * @returns {number}
  */
-export function getElapseTime() {
+function getElapseTime() {
   if (isPaused) {
     return elapseTime;
   } else {
@@ -67,8 +68,21 @@ export function getElapseTime() {
   }
 }
 
-export function checkDuration() {
+function checkDuration() {
   if (getElapseTime() >= duration) {
     stopTimer();
+    return false;
   }
+  return true;
 }
+
+module.exports = {
+  pauseTimer,
+  resumeTimer,
+  resetTimer,
+  stopTimer,
+  startTimer,
+  getElapseTime,
+  checkDuration,
+  getTimeNow,
+};

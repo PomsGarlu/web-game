@@ -77,6 +77,7 @@ let startButton = document.getElementById("startGame");
 let arena = document.getElementById("arena");
 let score = 0;
 let health = 100;
+let time = 0;
 let playersAlive = null;
 let isRoundOver = false;
 
@@ -116,9 +117,19 @@ ws.onopen = () => {
     console.log("WebSocket connection established");
 };
 
+
+// if a message from the BE is received 
+//TODO: check what data is and in what structure is being sent.
+
+
 ws.onmessage = (event) => {
     const playersInLobby = document.getElementById("playersInLobby");
     const data = JSON.parse(event.data);
+
+    if (data.type === "time") {
+        time = data.time;
+    }
+
     if (data.type === "assignPlayerId") {
         playerId = data.playerId;
         //console.log("Assigned id:", playerId);
@@ -222,7 +233,7 @@ ws.onmessage = (event) => {
             hideMenu();
             displayGame();
             displayHUD();
-            updateHUD(score, 100, null, playerName);
+            updateHUD(score, 100, time, playerName);
         }
 
         displayObstacles();
@@ -293,6 +304,8 @@ ws.onmessage = (event) => {
         gameLoop();
     }
 
+
+
     if (data.type === "nextRound") {
         //TODO: implement starting the next round
         for (let bullet of bullets) {
@@ -310,6 +323,9 @@ ws.onmessage = (event) => {
         isRoundOver = true;
     }
 };
+
+
+
 
 ws.onerror = (error) => {
     console.error("WebSocket error:", error);
@@ -334,7 +350,7 @@ function startNextRound() {
     //TODO: add logic to prepare next round
     document.querySelectorAll("#arena image.player").forEach((player) => player.remove());
 
-    updateHUD(score, 100, null, playerName);
+    updateHUD(score, 100, time, playerName);
     health = 100;
 
     const playerData = [
@@ -777,7 +793,7 @@ function handlePlayerHit(player, bullet) {
     // Decrease health
     if (player.id === playerId) {
         health -= 20;
-        updateHUD(score, health, null, playerName);
+        updateHUD(score, health, time, playerName);
     }
 
     player.dataset.health -= 20;
@@ -827,7 +843,7 @@ function handlePlayerHit(player, bullet) {
             if (playersAlive === 1) {
                 if (playerId != player.id) {
                     score++;
-                    updateHUD(score, health, null, playerName);
+                    updateHUD(score, health, time, playerName);
                     //TODO: implement starting the next round until the timer runs out
                     ws.send(JSON.stringify({ type: "updateScoreboard", playerName, score }));
                     ws.send(JSON.stringify({ type: "startNextRound" }));
