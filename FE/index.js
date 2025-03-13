@@ -276,6 +276,13 @@ ws.onmessage = (event) => {
         }
         bullets.length = 0;
         players = Object.values(data.players);
+        if (data.fullReset) {
+            setGameStatus("game");
+            removePause(gamePaused);
+            score = 0;
+            ws.send(JSON.stringify({ type: "updateScoreboard", playerName, score }));
+            alert(`Game was restarted by player: ${data.resetBy}`);
+        }
         isRoundOver = true;
     }
 };
@@ -878,5 +885,9 @@ function updateBullets() {
 function handlePauseAction(action) {
     if (action === "resume") {
         ws.send(JSON.stringify({ type: "sendResumeGame" }));
+    }
+
+    if (action === "restart") {
+        ws.send(JSON.stringify({ type: "startNextRound", fullReset: true, resetBy: playerName }));
     }
 }

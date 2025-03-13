@@ -17,6 +17,14 @@ export function displayPause(gamePaused, whoPaused, sendPauseAction) {
     if (resumeButton) {
         resumeButton.addEventListener("click", () => sendPauseAction("resume"));
     }
+
+    if (restartButton) {
+        restartButton.addEventListener("click", () => sendPauseAction("restart"));
+    }
+
+    if (quitButton) {
+        quitButton.addEventListener("click", () => sendPauseAction("quit"));
+    }
 }
 
 export function removePause(gamePaused) {

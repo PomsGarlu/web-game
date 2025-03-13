@@ -51,7 +51,12 @@ server.on("connection", (ws) => {
         }
 
         if (data.type === "startNextRound") {
-            broadcast({ type: "nextRound", players: getPlayersWithoutWs() });
+            broadcast({
+                type: "nextRound",
+                players: getPlayersWithoutWs(),
+                fullReset: data.fullReset,
+                resetBy: data.resetBy,
+            });
         }
 
         if (data.type === "sendPauseGame") {
