@@ -3,6 +3,7 @@ import { C } from "./src/constants.js";
 import { displayMenu, hideMenu } from "./elements/menu.js";
 import { displayGame, gameOver, gamePaused, gameRunning, inMenu, setGameStatus } from "./elements/game.js";
 import { displayHUD, updateHUD } from "./elements/hud.js";
+import { setScoreboard, displayScoreboard, updateScoreboard } from "./elements/scoreboard.js";
 
 const bulletShot = new Audio("shell_shot.wav");
 bulletShot.volume = 0.1;
@@ -63,7 +64,7 @@ const bullets = []; // Array to store active bullets
 let lastShotTime = 0;
 let bulletDirection = "up";
 let bulletImg = "";
-const FIRE_RATE = 200; // 200ms delay between shots
+const FIRE_RATE = 500; // 500ms delay between shots
 let playerIdList = [];
 let playerNameList = [];
 let playerId = null;
@@ -127,6 +128,10 @@ ws.onmessage = (event) => {
         movePlayer(data.playerId, data.direction, data.rotation, data.x, data.y);
     }
 
+    if (data.type === "globalUpdateScoreboard") {
+        updateScoreboard(data.playerName, data.playerScore);
+    }
+
     if (data.type === "shoot" && data.playerId !== playerId) {
         shootBullet(data.playerId, data.direction);
     }
@@ -171,6 +176,7 @@ ws.onmessage = (event) => {
         console.log("GAME START!!!");
         setGameStatus("game");
         if (gameRunning) {
+            setScoreboard(playerNameList);
             hideMenu();
             displayGame();
             displayHUD();
@@ -370,6 +376,13 @@ document.addEventListener("keydown", (e) => {
     }
     if (e.key === "g") {
         // setGameStatus("game");
+    }
+
+    if (e.key === "Tab") {
+        if (gameRunning) {
+            e.preventDefault(); // Prevents default tab behavior (switching focus)
+            displayScoreboard();
+        }
     }
 
     if (e.key === " ") {
@@ -773,6 +786,7 @@ function handlePlayerHit(player, bullet) {
                     score++;
                     updateHUD(score, health, null, playerName);
                     //TODO: implement starting the next round until the timer runs out
+                    ws.send(JSON.stringify({ type: "updateScoreboard", playerName, score }));
                     ws.send(JSON.stringify({ type: "startNextRound" }));
                 }
             }

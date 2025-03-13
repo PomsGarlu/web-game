@@ -1,4 +1,3 @@
-const { connection } = require("websocket");
 const WebSocket = require("ws");
 const port = process.env.PORT || 8080;
 const server = new WebSocket.Server({ port });
@@ -53,6 +52,10 @@ server.on("connection", (ws) => {
 
         if (data.type === "startNextRound") {
             broadcast({ type: "nextRound", players: getPlayersWithoutWs() });
+        }
+
+        if (data.type === "updateScoreboard") {
+            broadcast({ type: "globalUpdateScoreboard", playerName: data.playerName, playerScore: data.score });
         }
 
         if (data.type === "move") {

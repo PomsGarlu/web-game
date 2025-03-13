@@ -56,5 +56,6 @@ function resetHUD() {
 //TODO fix this to the backend
 export function displayHUD() {
     var hud = document.getElementById("hud");
+    hud.style.display = "flex";
     resetHUD();
 }

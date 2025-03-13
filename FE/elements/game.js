@@ -6,12 +6,12 @@ export let gameOver = false; // score screen
 export let inMenu = true; // lobby editor
 
 export function displayGame() {
-  var game = document.getElementById("game");
+    var game = document.getElementById("game");
+    game.style.display = "flex";
 
-
-  game.innerHTML = !gameRunning
-    ? "empty game"
-    : `
+    game.innerHTML = !gameRunning
+        ? "empty game"
+        : `
 <svg id="arena" class="arena" width="1344" height="768" viewBox="0 0 1344 768" xmlns="http://www.w3.org/2000/svg">
 Background
 <rect width="1344" height="768" fill="#444" />
@@ -25,9 +25,8 @@ Bullet Container (For dynamically created bullets)
 }
 
 export function setGameStatus(status) {
-    
     console.log("Setting game status to: " + status);
-    
+
     if (status === "menu") {
         inMenu = true;
         gameRunning = false;

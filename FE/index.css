@@ -62,6 +62,7 @@ form {
   text-align: center;
   margin: 20px;
   max-width: fit-content;
+  display: none;
 }
 
 #hud {
@@ -74,6 +75,22 @@ form {
   text-align: center;
   margin: 20px;
   max-width: fit-content;
+  display:none;
+}
+
+#scoreboard {
+  display: none;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -350%);
+  border: #444 5px solid;
+  border-radius: 10px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin: 20px;
+  max-width: fit-content;
+  z-index: 1000;
 }
 
 div {
