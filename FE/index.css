@@ -93,6 +93,22 @@ form {
   z-index: 1000;
 }
 
+#pause {
+  display: none;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: #444 5px solid;
+  border-radius: 10px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin: 20px;
+  max-width: fit-content;
+  z-index: 1000;
+  background: white;
+}
+
 div {
   margin: 10px;
   font: 25px Arial, sans-serif;

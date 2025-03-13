@@ -1,16 +1,27 @@
-import { gamePaused } from "./game.js";
+export function displayPause(gamePaused, whoPaused, sendPauseAction) {
+    const content = `
+      <h2>Paused by player: ${whoPaused}</h2>
+      <button type="submit" id="resumeGame" class="resumeGame">Continue</button>
+      <button type="submit" id="restartGame" class="restartGame">Restart</button>
+      <button type="submit" id="quitGame" class="quitGame">Quit</button>
+      <!-- SVG Arena -->
+    `;
+    var pause = document.getElementById("pause");
+    pause.innerHTML = gamePaused ? content : "Game is not paused";
+    pause.style.display = "block";
 
-const content = `
-<div id="pause">
-  <h1>Game Paused</h1>
-  <button type="submit" id="resumeGame" class="resumeGame">Resume Game</button>
-  <button type="submit" id="quitGame" class="quitGame">Quit Game</button>
-  <button type="submit" id="quitGame" class="quitGame">Quit Game</button>
-  <!-- SVG Arena -->
-</div>
-`;
+    const resumeButton = document.getElementById("resumeGame");
+    const restartButton = document.getElementById("restartGame");
+    const quitButton = document.getElementById("quitGame");
 
-export function displayPause() {
-  var pause = document.getElementById("pause");
-  pause.innerHTML = gamePaused ? "not paused" : content;
+    if (resumeButton) {
+        resumeButton.addEventListener("click", () => sendPauseAction("resume"));
+    }
+}
+
+export function removePause(gamePaused) {
+    var pause = document.getElementById("pause");
+    if (!gamePaused) {
+        pause.style.display = "none";
+    }
 }

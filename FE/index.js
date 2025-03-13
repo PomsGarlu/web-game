@@ -1,9 +1,10 @@
 const ws = new WebSocket("ws://localhost:8080");
 import { C } from "./src/constants.js";
 import { displayMenu, hideMenu } from "./elements/menu.js";
-import { displayGame, gameOver, gamePaused, gameRunning, inMenu, setGameStatus } from "./elements/game.js";
+import { displayGame, gameOver, gamePaused, gameRunning, setGameStatus } from "./elements/game.js";
 import { displayHUD, updateHUD } from "./elements/hud.js";
 import { setScoreboard, displayScoreboard, updateScoreboard } from "./elements/scoreboard.js";
+import { displayPause, removePause } from "./elements/pause.js";
 
 const bulletShot = new Audio("shell_shot.wav");
 bulletShot.volume = 0.1;
@@ -87,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
     arena = document.getElementById("arena");
     startButton = document.getElementById("startGame");
     nameForm.onclick = (e) => {
-        console.log("nameForm submitted");
+        //console.log("nameForm submitted");
         e.preventDefault();
         playerName = nameInput.value.trim();
         for (let i = 6; i < playerId.length; i++) {
@@ -98,13 +99,13 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     startButton.addEventListener("click", () => {
-        console.log("startButton clicked");
+        //console.log("startButton clicked");
         setGameStatus("game");
         if (playerIdList.length >= 2 && playerIdList.length < 5 && playerNameList.length === playerIdList.length) {
             ws.send(JSON.stringify({ type: "startGame" }));
         } else {
             alert("Not all players are ready!");
-            console.log("playerIdList:", playerIdList, "playerNameList:", playerNameList);
+            //console.log("playerIdList:", playerIdList, "playerNameList:", playerNameList);
         }
     });
 });
@@ -120,16 +121,33 @@ ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
     if (data.type === "assignPlayerId") {
         playerId = data.playerId;
-        console.log("Assigned id:", playerId);
+        //console.log("Assigned id:", playerId);
     }
 
     if (data.type === "move") {
-        console.log(data.playerId, "move", data.direction);
+        //console.log(data.playerId, "move", data.direction);
         movePlayer(data.playerId, data.direction, data.rotation, data.x, data.y);
     }
 
     if (data.type === "globalUpdateScoreboard") {
         updateScoreboard(data.playerName, data.playerScore);
+    }
+
+    if (data.type === "pauseGame") {
+        for (let bullet of bullets) {
+            bullet.element.remove();
+        }
+        bullets.length = 0;
+        setGameStatus("pause");
+        Object.keys(keys).forEach((key) => {
+            keys[key] = false;
+        });
+        displayPause(gamePaused, data.whoPaused, handlePauseAction);
+    }
+
+    if (data.type === "resumeGame") {
+        setGameStatus("game");
+        removePause(gamePaused);
     }
 
     if (data.type === "shoot" && data.playerId !== playerId) {
@@ -168,12 +186,12 @@ ws.onmessage = (event) => {
             }
         }
 
-        console.log("playerIdList:", playerIdList);
+        //console.log("playerIdList:", playerIdList);
         playersInLobby.textContent = `Connected players: ${playerIdList.length}`;
     }
 
     if (data.type === "gameStart") {
-        console.log("GAME START!!!");
+        //console.log("GAME START!!!");
         setGameStatus("game");
         if (gameRunning) {
             setScoreboard(playerNameList);
@@ -186,7 +204,7 @@ ws.onmessage = (event) => {
         displayObstacles();
 
         let players = Object.values(data.players);
-        console.log("Players:", players);
+        //console.log("Players:", players);
 
         // lobby.style.display = "none";
         // arena.style.display = "block";
@@ -210,7 +228,7 @@ ws.onmessage = (event) => {
                 img.setAttribute("y", player.y);
                 img.setAttribute("id", player.playerId);
                 img.classList.add("player");
-                console.log("Player", img);
+                //console.log("Player", img);
 
                 if (playerId === player.playerId) {
                     if (playerData[index].href === "player1tank.png") {
@@ -229,10 +247,10 @@ ws.onmessage = (event) => {
 
                 arena = document.getElementById("arena");
                 if (arena) {
-                    console.log("Arena exists");
+                    //console.log("Arena exists");
                     arena.appendChild(img);
                 } else {
-                    console.log("Arena does not exist");
+                    //console.log("Arena does not exist");
                 }
 
                 arena.appendChild(img);
@@ -247,7 +265,7 @@ ws.onmessage = (event) => {
             player.dataset.health = 100;
         });
         // how frequently is this called?
-        console.log("update from gameStart");
+        //console.log("update from gameStart");
         gameLoop();
     }
 
@@ -307,7 +325,7 @@ function startNextRound() {
             img.setAttribute("y", playerData[index].y);
             img.setAttribute("id", player.playerId);
             img.classList.add("player");
-            console.log("Player", img);
+            //console.log("Player", img);
 
             if (playerId === player.playerId) {
                 if (playerData[index].href === "player1tank.png") {
@@ -326,10 +344,10 @@ function startNextRound() {
 
             arena = document.getElementById("arena");
             if (arena) {
-                console.log("Arena exists");
+                //console.log("Arena exists");
                 arena.appendChild(img);
             } else {
-                console.log("Arena does not exist");
+                //console.log("Arena does not exist");
             }
 
             arena.appendChild(img);
@@ -361,40 +379,36 @@ const keys = {
 
 document.addEventListener("keydown", (e) => {
     if (keys[e.key]) return; // Prevent repeated keydown events
-    keys[e.key] = true;
+    if (gameRunning && !gamePaused) {
+        keys[e.key] = true;
+    }
 
     // Esc to pause game
-    if (e.key === "p") {
-        // setGameStatus("pause");
-    }
-    if (e.key === "r") {
-        setGameStatus("game");
-    }
-    // M to go to the menu ( should be removed for prod.)
-    if (e.key === "m") {
-        setGameStatus("menu");
-    }
-    if (e.key === "g") {
-        // setGameStatus("game");
+    if (e.key === "Escape") {
+        if (gameRunning && !gamePaused) {
+            ws.send(JSON.stringify({ type: "sendPauseGame", whoPaused: playerName }));
+        }
     }
 
     if (e.key === "Tab") {
-        if (gameRunning) {
+        if (gameRunning && !gamePaused) {
             e.preventDefault(); // Prevents default tab behavior (switching focus)
             displayScoreboard();
         }
     }
 
     if (e.key === " ") {
-        const now = Date.now();
-        if (now - lastShotTime > FIRE_RATE) {
-            if (bulletDirection) {
-                // Ensure a valid direction before shooting
-                console.log("Shooting bullet...");
-                lastShotTime = now; // Update before shooting
-                shootBullet(playerId, bulletDirection);
-            } else {
-                console.log("Cannot shoot: No bullet direction set!");
+        if (gameRunning && !gamePaused) {
+            const now = Date.now();
+            if (now - lastShotTime > FIRE_RATE) {
+                if (bulletDirection) {
+                    // Ensure a valid direction before shooting
+                    //console.log("Shooting bullet...");
+                    lastShotTime = now; // Update before shooting
+                    shootBullet(playerId, bulletDirection);
+                } else {
+                    //console.log("Cannot shoot: No bullet direction set!");
+                }
             }
         }
     }
@@ -415,7 +429,7 @@ function isColliding(x, y, width, height) {
 }
 
 function checkRectCollision(x1, y1, width1, height1, obstacle) {
-    console.log("checking obstacle:", obstacle, "\n", "x1:", x1, "y1:", y1, "width1:", width1, "height1", height1);
+    //console.log("checking obstacle:", obstacle, "\n", "x1:", x1, "y1:", y1, "width1:", width1, "height1", height1);
 
     const obstacleX = parseFloat(obstacle.getAttribute("x"));
     const obstacleY = parseFloat(obstacle.getAttribute("y"));
@@ -427,7 +441,7 @@ function checkRectCollision(x1, y1, width1, height1, obstacle) {
     const obstacleTop = obstacleY;
     const obstacleBottom = obstacleY + obstacleHeight;
 
-    console.log(
+    /*console.log(
         "obstacle left:",
         obstacleLeft,
         "obstacle right:",
@@ -436,14 +450,14 @@ function checkRectCollision(x1, y1, width1, height1, obstacle) {
         obstacleTop,
         "obstacle bottom:",
         obstacleBottom
-    );
+    );*/
 
     const objectLeft = x1;
     const objectRight = x1 + width1;
     const objectTop = y1;
     const objectBottom = y1 + height1;
 
-    console.log(
+    /*console.log(
         "obstacle left",
         obstacleLeft,
         "obstacle right:",
@@ -452,7 +466,7 @@ function checkRectCollision(x1, y1, width1, height1, obstacle) {
         obstacleTop,
         "obstacle bottom:",
         obstacleBottom
-    );
+    );*/
     // Check for intersection between the bullet and the obstacle
     const isColliding = !(
         objectRight < obstacleLeft ||
@@ -518,7 +532,7 @@ function movePlayer(id, direction, rotation, addX, addY) {
         player.setAttribute("x", newX);
         player.setAttribute("y", newY);
     } else {
-        console.log("Collision detected! Movement blocked.");
+        //console.log("Collision detected! Movement blocked.");
     }
     player.setAttribute("transform", `rotate(${rotation} ${newX + C.PLAYER_SIZE_X / 2} ${newY + C.PLAYER_SIZE_Y / 2})`);
 }
@@ -526,7 +540,7 @@ function movePlayer(id, direction, rotation, addX, addY) {
 // Send bullet data to the BE
 function shootBullet(pId, direction) {
     if (!direction) {
-        console.log("Cannot shoot: No bullet direction set!");
+        //console.log("Cannot shoot: No bullet direction set!");
         return;
     }
 
@@ -550,7 +564,7 @@ function shootBullet(pId, direction) {
         bulletImage = bulletImg;
     } else {
         let tankImage = player.getAttribute("href");
-        console.log(tankImage);
+        //console.log(tankImage);
         switch (tankImage) {
             case "player1tank.png":
                 bulletImage = "bullet1.png";
@@ -663,7 +677,7 @@ function shootBullet(pId, direction) {
 
         // Check for obstacle collision
         if (isColliding(bulletX, bulletY, 10, 14)) {
-            console.log("Bullet hit an obstacle!");
+            //console.log("Bullet hit an obstacle!");
 
             // Explosion position
             const explosionX = bulletX - 26;
@@ -712,14 +726,14 @@ function checkBulletCollision(bullet) {
         if (player) {
             const bulletBox = bullet.element.getBBox();
             const playerBox = player.getBBox();
-            console.log(bulletBox, "\n", playerBox);
+            //console.log(bulletBox, "\n", playerBox);
             if (
                 bulletBox.x < playerBox.x + playerBox.width &&
                 bulletBox.x + bulletBox.width > playerBox.x &&
                 bulletBox.y < playerBox.y + playerBox.height &&
                 bulletBox.y + bulletBox.height > playerBox.y
             ) {
-                console.log(`Bullet hit ${player.id}!`);
+                //console.log(`Bullet hit ${player.id}!`);
                 handlePlayerHit(player, bullet); // Pass bullet position to explosion
                 return true; // Collision detected
             }
@@ -729,7 +743,7 @@ function checkBulletCollision(bullet) {
 }
 
 function handlePlayerHit(player, bullet) {
-    console.log(`${player.id} was hit!`);
+    //console.log(`${player.id} was hit!`);
 
     // Decrease health
     if (player.id === playerId) {
@@ -738,7 +752,7 @@ function handlePlayerHit(player, bullet) {
     }
 
     player.dataset.health -= 20;
-    console.log(`${player.id} health: ${player.dataset.health}`);
+    //console.log(`${player.id} health: ${player.dataset.health}`);
 
     // Update the player's `data-health` attribute (optional for debugging)
     player.setAttribute("data-health", player.dataset.health);
@@ -757,7 +771,7 @@ function handlePlayerHit(player, bullet) {
     const explosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
 
     if (player.dataset.health <= 0) {
-        console.log(`${player.id} is eliminated!`);
+        //console.log(`${player.id} is eliminated!`);
 
         // Use "Explosion53.gif" for destroyed tanks
         const tankExplosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
@@ -826,7 +840,7 @@ function updateBullets() {
         // **Check if the bullet collides with an obstacle**
         if (isColliding(newX, newY, 10, 14)) {
             // Bullet size is 10x14
-            console.log("Bullet hit an obstacle!");
+            //console.log("Bullet hit an obstacle!");
 
             // **Remove the bullet**
             bullet.element.remove();
@@ -858,5 +872,11 @@ function updateBullets() {
             bullet.element.remove();
             bullets.splice(i, 1);
         }
+    }
+}
+
+function handlePauseAction(action) {
+    if (action === "resume") {
+        ws.send(JSON.stringify({ type: "sendResumeGame" }));
     }
 }

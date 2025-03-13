@@ -27,24 +27,20 @@ Bullet Container (For dynamically created bullets)
 export function setGameStatus(status) {
     console.log("Setting game status to: " + status);
 
-    if (status === "menu") {
-        inMenu = true;
-        gameRunning = false;
-        gamePaused = false;
-        gameOver = false;
-    }
     if (status === "game") {
         inMenu = false;
         gameRunning = true;
         gamePaused = false;
         gameOver = false;
     }
+
     if (status === "pause") {
         inMenu = false;
         gameRunning = false;
         gamePaused = true;
         gameOver = false;
     }
+
     if (status === "over") {
         inMenu = false;
         gameRunning = false;

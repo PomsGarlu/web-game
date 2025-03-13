@@ -54,6 +54,14 @@ server.on("connection", (ws) => {
             broadcast({ type: "nextRound", players: getPlayersWithoutWs() });
         }
 
+        if (data.type === "sendPauseGame") {
+            broadcast({ type: "pauseGame", whoPaused: data.whoPaused });
+        }
+
+        if (data.type === "sendResumeGame") {
+            broadcast({ type: "resumeGame" });
+        }
+
         if (data.type === "updateScoreboard") {
             broadcast({ type: "globalUpdateScoreboard", playerName: data.playerName, playerScore: data.score });
         }
