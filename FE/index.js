@@ -150,6 +150,30 @@ ws.onmessage = (event) => {
         removePause(gamePaused);
     }
 
+    if (data.type === "quitNotifier") {
+        setGameStatus("game");
+        removePause(gamePaused);
+        if (data.quittingPlayerId === playerId) {
+            alert("You will be redirected to the lobby");
+            window.location.reload();
+        } else {
+            alert(`Player ${data.quittingPlayer} has quit the game!`);
+            let quitPlayer = document.getElementById(data.quittingPlayerId);
+            console.log(quitPlayer);
+            quitPlayer.remove();
+            delete players[playerId]; // Remove from the players object
+            playersAlive--;
+            if (playersAlive === 1) {
+                ws.send(JSON.stringify({ type: "sendWinNotifier", winner: playerName, winnerScore: score }));
+            }
+        }
+    }
+
+    if (data.type === "winNotifier") {
+        alert(`Player ${data.winner} has won the game with a score of ${data.winnerScore}!`);
+        window.location.reload();
+    }
+
     if (data.type === "shoot" && data.playerId !== playerId) {
         shootBullet(data.playerId, data.direction);
     }
@@ -398,10 +422,8 @@ document.addEventListener("keydown", (e) => {
     }
 
     if (e.key === "Tab") {
-        if (gameRunning && !gamePaused) {
-            e.preventDefault(); // Prevents default tab behavior (switching focus)
-            displayScoreboard();
-        }
+        e.preventDefault(); // Prevents default tab behavior (switching focus)
+        displayScoreboard();
     }
 
     if (e.key === " ") {
@@ -889,5 +911,9 @@ function handlePauseAction(action) {
 
     if (action === "restart") {
         ws.send(JSON.stringify({ type: "startNextRound", fullReset: true, resetBy: playerName }));
+    }
+
+    if (action === "quit") {
+        ws.send(JSON.stringify({ type: "sendQuitNotifier", quittingPlayer: playerName, quittingPlayerId: playerId }));
     }
 }

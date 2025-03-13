@@ -67,6 +67,18 @@ server.on("connection", (ws) => {
             broadcast({ type: "resumeGame" });
         }
 
+        if (data.type === "sendQuitNotifier") {
+            broadcast({
+                type: "quitNotifier",
+                quittingPlayer: data.quittingPlayer,
+                quittingPlayerId: data.quittingPlayerId,
+            });
+        }
+
+        if (data.type === "sendWinNotifier") {
+            broadcast({ type: "winNotifier", winner: data.winner, winnerScore: data.winnerScore });
+        }
+
         if (data.type === "updateScoreboard") {
             broadcast({ type: "globalUpdateScoreboard", playerName: data.playerName, playerScore: data.score });
         }
