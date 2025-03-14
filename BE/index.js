@@ -104,6 +104,12 @@ server.on("connection", (ws) => {
     if (data.type === "selectName") {
       console.log("data");
       players[playerId].name = data.name;
+      activePlayers.forEach((player) => {
+        if (player.playerId === playerId) {
+          player.name = data.name;
+        }
+      }
+      );
       broadcastLobby();
     }
 //TODO: send in the health  from the front end not the delta
@@ -111,7 +117,7 @@ server.on("connection", (ws) => {
       console.log("HP Update:", data);
       activePlayers.forEach((player) => {
         if (player.playerId === data.playerId) {
-          player.health -= data.hp; // subtract the hp from the player
+          player.health = data.hp; // set new health
           console.log("Player" , player);
           console.log("Player reduction", player.hp);
           // console.log("Player stats", player);

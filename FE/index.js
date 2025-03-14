@@ -42,22 +42,6 @@ const obstacles = [
   { x: 1048, y: 585, width: 115, height: 30, image: "" },
   { x: 370, y: 306, width: 40, height: 35, image: "" },
 ];
-
-const ambientSound = new Audio("./audio/menu_beat_2_27.mp3");
-ambientSound.loop = true;
-ambientSound.volume = 0.03; // Adjust volume (0.0 to 1.0)
-
-// Disabled background music for now
-window.addEventListener("load", () => {
-  // ambientSound.play().catch((error) => console.log("Audio playback error:", error));
-});
-
-document.addEventListener("click", () => {
-  // if (ambientSound.paused) {
-  //     ambientSound.play().catch((error) => console.log("Audio playback error:", error));
-  // }
-});
-
 function displayObstacles() {
   const arena = document.getElementById("arena");
 
@@ -78,7 +62,21 @@ function displayObstacles() {
   });
 }
 
-// Menu controlls
+const ambientSound = new Audio("./audio/menu_beat_2_27.mp3");
+ambientSound.loop = true;
+ambientSound.volume = 0.03; // Adjust volume (0.0 to 1.0)
+
+// Disabled background music for now
+window.addEventListener("load", () => {
+  // ambientSound.play().catch((error) => console.log("Audio playback error:", error));
+});
+// Play background music on user interaction
+document.addEventListener("click", () => {
+  // if (ambientSound.paused) {
+  //     ambientSound.play().catch((error) => console.log("Audio playback error:", error));
+  // }
+});
+// Menu controls
 
 const bullets = []; // Array to store active bullets
 let lastShotTime = 0;
@@ -295,7 +293,6 @@ ws.onmessage = (event) => {
         waitingMessage.textContent = `Please set your name!`;
       }
     }
-    //console.log("playerIdList:", playerIdList);
     playersInLobby.textContent = `Connected players: ${playerIdList.length}`;
   }
 
@@ -316,9 +313,6 @@ ws.onmessage = (event) => {
     let players = Object.values(data.players);
 
     console.log("Players on the front end:", players);
-
-    // lobby.style.display = "none";
-    // arena.style.display = "block";
 
     const playerData = [
       { href: "./images/player1tank.png", x: 1314, y: 30, rotation: 0 },
@@ -420,7 +414,6 @@ ws.onclose = () => {
 
 // GAME LOOP
 function gameLoop() {
-
   if (isRoundOver) {
     startNextRound();
     resetRunContainer();
@@ -589,7 +582,6 @@ function checkRectCollision(x1, y1, width1, height1, obstacle) {
   const objectRight = x1 + width1;
   const objectTop = y1;
   const objectBottom = y1 + height1;
-
   /*console.log(
         "obstacle left",
         obstacleLeft,
@@ -607,10 +599,8 @@ function checkRectCollision(x1, y1, width1, height1, obstacle) {
     objectBottom < obstacleTop ||
     objectTop > obstacleBottom
   );
-
   return isColliding;
 }
-
 // Send player movement to the BE
 function sendPlayerMove(x, y, direction, rotation) {
   ws.send(
@@ -624,7 +614,6 @@ function sendPlayerMove(x, y, direction, rotation) {
     })
   );
 }
-
 // Get player movement type to be sent to the BE.
 function updateLocalPlayer() {
   // Handle diagonal movement first (since it's the higher-priority check)
@@ -668,7 +657,6 @@ function updateLocalPlayer() {
     sendPlayerMove(C.MOVE_SPEED, 0, "right", 90);
   }
 }
-
 // Moves the player locally
 function movePlayer(id, direction, rotation, addX, addY) {
   let player = document.getElementById(id);
@@ -701,11 +689,6 @@ function movePlayer(id, direction, rotation, addX, addY) {
     })`
   );
 }
-
-function updatePlayerHealth(playerId, health) {
-  //
-}
-
 // Send bullet data to the BE
 function shootBullet(pId, direction) {
   if (!direction) {
@@ -929,10 +912,12 @@ function handlePlayerHit(player, bullet) {
   console.log("Player hit:", player.id, "bullet:", bullet.shooter);
   // Decrease health
 
-
   if (player.id === playerId) {
     health -= 20;
     updateHUD(score, health, time, playerName);
+    ws.send(
+      JSON.stringify({ type: "updateHp", playerId: player.id, hp: health })
+    );
   }
 
   player.dataset.health -= 20;
@@ -941,8 +926,7 @@ function handlePlayerHit(player, bullet) {
   // Update the player's `data-health` attribute (optional for debugging)
   player.setAttribute("data-health", player.dataset.health);
 
-  ws.send(JSON.stringify({ type: "updateHp", playerId: player.id ,hp: 100 }));
-
+  ws.send(JSON.stringify({ type: "updateHp", playerId: player.id, hp: 100 }));
 
   // Apply glow effect
   player.style.filter = "brightness(2)";
@@ -993,13 +977,15 @@ function handlePlayerHit(player, bullet) {
           updateHUD(score, health, time, playerName);
           // This is the new score by HS
           ws.send(
-                    JSON.stringify({
-                    type: "updateScore",
-                    playerId: bullet.shooter,
-                    score: 100,
+            JSON.stringify({
+              type: "updateScore",
+              playerId: bullet.shooter,
+              score: 100,
             })
           );
-          ws.send(JSON.stringify({ type: "updateHp", playerId: player.id ,hp: 0})); // when you die set health to 0
+          ws.send(
+            JSON.stringify({ type: "updateHp", playerId: player.id, hp: 0 })
+          ); // when you die set health to 0
           // This is the old score by KH
           ws.send(
             JSON.stringify({ type: "updateScoreboard", playerName, score })
@@ -1032,8 +1018,8 @@ function handlePlayerHit(player, bullet) {
         score: 10,
       })
     );
-    
-    ws.send(JSON.stringify({ type: "updateHp", playerId: player.id ,hp: 20})); // reduce health by 20
+
+    ws.send(JSON.stringify({ type: "updateHp", playerId: player.id, hp: 20 })); // reduce health by 20
     // Add explosion to the arena
     document.getElementById("arena").appendChild(explosion);
 

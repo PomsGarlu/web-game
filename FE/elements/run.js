@@ -9,6 +9,7 @@ export function initiateRunContainer(activePlayers) {
 
     let content = "";
     activePlayers.forEach(player => {
+        console.log("Player", player);
         content += `<div class="runStat" id="${player.playerId}+${player.name}"> Player: ${player.name}  Health :${player.health}  Score: ${player.score} </div>`;
     });
     if (runDiv) {
