@@ -15,3 +15,44 @@ todo  -> Game Over screen
 
 Graphics
 
+
+DONE: It runs at a minimum of 60 FPS.
+DONE: The chosen game is appropriate.
+DONE: It cannot just be a words/numbers based game. It must have playable characters, or a level of interactivity with other players which is competitive in nature.
+DONE: The playable characters are equal.
+DONE: All players have an equal chance of winning
+DONE: The game supports between 2 and 4 players.
+DONE: Each player can see all other players and their actions in real-time.
+DONE:Each player can join from their own computer (browser).
+DONE: Each player can join the game from a URL or IP address they are provided.
+CHECK: It does not have to be a pretty URL. It can be some temporary URL or IP address that allows the session to be joined. It must be available from any browser (not just from computers on the same network).
+DONE: Each player can select or type a player name.
+DONE: The chosen player name is unique. // it auto increments a number
+DONE: The lead player can start the game once there are between 2 and 4 players.
+DONE: The game runs without crashing.
+DONE: The game is stable throughout game play sessions.
+DONE: It runs without dropping frames
+DONE: HTML canvas is prohibited, and is not in use. 
+DONE: There are no dropped frames when pausing the game.
+DONE: The animation runs smoothly with proper use of RequestAnimationFrame.
+DONE: When a player pauses, restarts or quits, their name is displayed to other players.
+TODO:/DONE The game displays the pause menu with options to continue, restart or quit. (the menu kinda works implement end game) ADD END GAME
+
+TODO: The player ahs implemented a scoring/lives system.
+TODO: All players can see the score/lives of all opponents.
+TODO: The score/lives updates in real time
+TODO: At the end of the game, the winner is displayed (win condition last person in the lobby or person with highest score)
+TODO: A timer counts up or down. (implement end game on set time)
+DONE: All players simultaneously see the same game timer.
+DONE: RequestAnimationFrame runs smoothly, unaffected by pausing the game.
+
+Extra
+DONE: It is possible to control game play with the keyboard
+DONE: Keyboard entry must be smooth, with no input delays. It must not have any long-press input glitches.
+DONE: It incorporates a range of sound effects.
+DONE: It performs responds significantly beyond the minimum specification.
+DONE: the game is visually pleasing, shows creativity.
+DONE: The game play is enjoyable and intriguing.
+DONE: The game implements additional features and functionality to enhance gameplay
+DONE: Such as power-ups, special abilities, custom game modes etc.
+DONE: Players experience minimal lag or delay, allowing for smooth and uninterrupted gameplay sessions, which positively impacts engagement and enjoyment.

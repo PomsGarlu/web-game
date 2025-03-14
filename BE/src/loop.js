@@ -1,5 +1,7 @@
 
+ // not used!
 
+ 
 function updatePlayers() {
   for (let i = 0; i < players.length; i++) {
     players[i].update();
