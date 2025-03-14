@@ -12,13 +12,15 @@ let gameOver = false;
 let runningTimer=false
 let pausedTimer=false
 
-// Sets a tick to send data to the front end.
+
+// Sets a tick sending the time to the front end every 500ms
 setInterval(() => {
   time = timer.getElapseTime(pausedTimer);
   if (time > -1 ){
     broadcast({ type: "time", time }); // send the time to the front end if -1 meaning the timer is not running 
   }
 }, 500);
+
 
 server.on("connection", (ws) => {
   if (Object.keys(players).length >= 4) {
@@ -42,9 +44,11 @@ server.on("connection", (ws) => {
     x: spawnPoints[(playerCounter - 1) % spawnPoints.length].x,
     y: spawnPoints[(playerCounter - 1) % spawnPoints.length].y,
     hp: 100,
-    direction: "up", // need to change the direction for the player on the bottom or top.
+    direction:spawnPoints[(playerCounter - 1) % spawnPoints.length].y < 100 ? "down" : "up", // need to change the direction for the player on the bottom or top.
     ws,
   };
+
+
 
   function timerOperations(timerSwitch) {
     // console.log("Timer Switch", timerSwitch);
@@ -93,9 +97,11 @@ server.on("connection", (ws) => {
 
     if (data.type === "startNextRound") {
       console.log("Next Round");
+      let playersWithoutWs = getPlayersWithoutWs();
+      console.log("Players Without WS", playersWithoutWs);
       broadcast({
         type: "nextRound",
-        players: getPlayersWithoutWs(),
+        players: playersWithoutWs,
         fullReset: data.fullReset,
         resetBy: data.resetBy,
       });
@@ -166,6 +172,9 @@ server.on("connection", (ws) => {
 
     if (data.type === "startGame") {
       gameRunning = true;
+      console.log("Game Started");
+      let playersWithoutWs = getPlayersWithoutWs();
+      console.log("Players Without WS", playersWithoutWs);
       console.log("Game Started");
       broadcast({ type: "gameStart", players: getPlayersWithoutWs() });
     }

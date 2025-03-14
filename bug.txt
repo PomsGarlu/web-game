@@ -3,4 +3,5 @@
  3 - the quit only kicks one person out.
  4 - if  quit the game stalls for other players  
  5 - players not re spawning 
- 6 - timer resets on kill
+ 6 - timer resets on kill ? 
+ 7- There is still the cursor moving in the hud when the game is ongoing

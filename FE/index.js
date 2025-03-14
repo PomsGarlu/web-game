@@ -240,23 +240,22 @@ ws.onmessage = (event) => {
         } else {
             startButton.style.display = "none";
         }
-
+// TODO: create more divs to hold different parts of the message.
         if (isLeader) {
             if (playerName) {
-                waitingMessage.textContent = `Your name is set as ${playerName} and you are the lobby leader.`;
+                waitingMessage.textContent = `Your name is set as ${playerName}  and you are the lobby leader.`;
                 updateHUD(null, 100, null, playerName);
             } else {
                 waitingMessage.textContent = `You are the lobby leader. Please set your name!`;
             }
         } else {
             if (playerName) {
-                waitingMessage.textContent = `Your name is set as ${playerName}. Waiting for the lobby leader to start the game.`;
+                waitingMessage.textContent = `Your name is set as ${playerName} . Waiting for the lobby leader to start the game.`;
                 updateHUD(null, 100, null, playerName);
             } else {
                 waitingMessage.textContent = `Please set your name!`;
             }
         }
-
         //console.log("playerIdList:", playerIdList);
         playersInLobby.textContent = `Connected players: ${playerIdList.length}`;
     }
@@ -275,20 +274,23 @@ ws.onmessage = (event) => {
         displayObstacles();
 
         let players = Object.values(data.players);
-        //console.log("Players:", players);
+
+
+        console.log("Players on the front end:", players);
 
         // lobby.style.display = "none";
         // arena.style.display = "block";
 
         const playerData = [
-            { href: "./images/player1tank.png", x: 1314, y: 30 },
-            { href: "./images/player2tank.png", x: 30, y: 30 },
-            { href: "./images/player3tank.png", x: 30, y: 708 },
-            { href: "./images/player4tank.png", x: 1314, y: 708 },
+            { href: "./images/player1tank.png", x: 1314, y: 30 ,rotation: 0},
+            { href: "./images/player2tank.png", x: 30, y: 30 , rotation: 0},
+            { href: "./images/player3tank.png", x: 30, y: 708 ,rotation: 180},
+            { href: "./images/player4tank.png", x: 1314, y: 708, rotation: 180 },
         ];
 
         playersAlive = 0;
         players.forEach((player, index) => {
+            console.log("creating player", player, "index", index);
             playersAlive++;
             if (index < playerData.length) {
                 const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
@@ -298,6 +300,7 @@ ws.onmessage = (event) => {
                 img.setAttribute("x", player.x);
                 img.setAttribute("y", player.y);
                 img.setAttribute("id", player.playerId);
+                img.setAttribute("transform", `rotate(${playerData[index].rotation} ${playerData[index].x + 13} ${playerData[index].y + 26})`);
                 img.classList.add("player");
                 //console.log("Player", img);
 
@@ -360,9 +363,6 @@ ws.onmessage = (event) => {
     }
 };
 
-
-
-
 ws.onerror = (error) => {
     console.error("WebSocket error:", error);
     console.log("stop timer");
@@ -375,7 +375,7 @@ ws.onclose = () => {
     ws.send(JSON.stringify({ type: "timer", status:"stop"}));
 };
 
-// Game loop needs to get a tick?
+
 function gameLoop() {
     if (isRoundOver) {
         startNextRound();
@@ -390,21 +390,23 @@ function gameLoop() {
 function startNextRound() {
     //TODO: add logic to prepare next round
     document.querySelectorAll("#arena image.player").forEach((player) => player.remove());
-
-    updateHUD(score, 100, time, playerName);
     health = 100;
+    updateHUD(score, health, time, playerName);
+    
 
     const playerData = [
-        { href: "./images/player1tank.png", x: 1314, y: 30 },
-        { href: "./images/player2tank.png", x: 30, y: 30 },
-        { href: "./images/player3tank.png", x: 30, y: 708 },
-        { href: "./images/player4tank.png", x: 1314, y: 708 },
+        { href: "./images/player1tank.png", x: 1314, y: 30, rotation: 0 },
+        { href: "./images/player2tank.png", x: 30, y: 30, rotation:0},
+        { href: "./images/player3tank.png", x: 30, y: 708, rotation: 180 },
+        { href: "./images/player4tank.png", x: 1314, y: 708,rotation: 180 },
     ];
 
     playersAlive = 0;
     players.forEach((player, index) => {
+        console.log("creating player", player, "index", index);
         playersAlive++;
         if (index < playerData.length) {
+            console.log ("creating player", playerData[index]);
             const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
             img.setAttribute("href", playerData[index].href);
             img.setAttribute("width", "26");
@@ -413,7 +415,7 @@ function startNextRound() {
             img.setAttribute("y", playerData[index].y);
             img.setAttribute("id", player.playerId);
             img.classList.add("player");
-            //console.log("Player", img);
+            console.log("Player", playerData[index].href);
 
             if (playerId === player.playerId) {
                 if (playerData[index].href === "./images/player1tank.png") {
