@@ -20,11 +20,15 @@ class HUDcontent {
 
 export function updateHUD(hudScore, hudHealth, hudTimer, hudName) {
     console.log("HUD update", hudScore, hudHealth, hudTimer, hudName);
-    
+
+    const minutes = Math.floor(hudTimer / 60);
+    const seconds = hudTimer % 60;
+    const formattedTime = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
     content = `
     <div id='score'>Score: ${hudScore ? hudScore : "0"}</div>
     <div id='health' >Health: ${hudHealth ? hudHealth : "0"}</div>
-    <div id='time'>Timer: ${hudTimer ? hudTimer : "0"}</div>
+    <div id='time'>Timer: ${formattedTime ? formattedTime : "0"}</div>
     <div id='playerName' >Player: ${hudName ? hudName : "No name yet"}</div>
 `;
     var hud = document.getElementById("hud");
@@ -39,11 +43,14 @@ export function updateHUD(hudScore, hudHealth, hudTimer, hudName) {
 function getHUDUpdate() {
     return HUDcontent;
 }
- 
-export function updateHUDTimer(hudTimer){
+
+export function updateHUDTimer(hudTimer) {
     var timer = document.getElementById("time");
     if (timer) {
-        timer.innerHTML = `Timer: ${hudTimer}`;
+        const minutes = Math.floor(hudTimer / 60);
+        const seconds = hudTimer % 60;
+        const formattedTime = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+        timer.innerHTML = `Timer: ${formattedTime}`;
     }
 }
 
