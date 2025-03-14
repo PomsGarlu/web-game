@@ -162,6 +162,12 @@ ws.onmessage = (event) => {
         //console.log("Assigned id:", playerId);
     }
 
+    // if (data.type === "updateHp") {
+    //     playerId = data.playerId;
+    //     let newHp = data.health;
+    //     // Update Player health;
+    // }
+
     if (data.type === "move") {
         //console.log(data.playerId, "move", data.direction);
         movePlayer(data.playerId, data.direction, data.rotation, data.x, data.y);
@@ -183,7 +189,6 @@ ws.onmessage = (event) => {
             keys[key] = false;
         });
         displayPause(gamePaused, data.whoPaused, handlePauseAction);
-
     }
 
     if (data.type === "resumeGame") {
@@ -240,7 +245,7 @@ ws.onmessage = (event) => {
         } else {
             startButton.style.display = "none";
         }
-// TODO: create more divs to hold different parts of the message.
+        // TODO: create more divs to hold different parts of the message.
         if (isLeader) {
             if (playerName) {
                 waitingMessage.textContent = `Your name is set as ${playerName}  and you are the lobby leader.`;
@@ -592,7 +597,7 @@ function updateLocalPlayer() {
     } else if ((keys.ArrowDown && keys.ArrowRight) || (keys.s && keys.d)) {
         sendPlayerMove(C.DIAGONAL_MOVE_SPEED, C.DIAGONAL_MOVE_SPEED, "downright", 135);
     }
-    // Now handle the regular movement (up, down, left, right)
+    // Now handle the regular movement (up, down, left, right, angle)
     else if (keys.ArrowUp || keys.w) {
         sendPlayerMove(0, -C.MOVE_SPEED, "up", 0);
     } else if (keys.ArrowDown || keys.s) {
@@ -604,6 +609,7 @@ function updateLocalPlayer() {
     }
 }
 
+// Moves the player locally
 function movePlayer(id, direction, rotation, addX, addY) {
     let player = document.getElementById(id);
     if (id === playerId) {
@@ -623,6 +629,10 @@ function movePlayer(id, direction, rotation, addX, addY) {
         //console.log("Collision detected! Movement blocked.");
     }
     player.setAttribute("transform", `rotate(${rotation} ${newX + C.PLAYER_SIZE_X / 2} ${newY + C.PLAYER_SIZE_Y / 2})`);
+}
+
+function updatePlayerHealth(playerId, health) {
+// 
 }
 
 // Send bullet data to the BE
@@ -821,7 +831,7 @@ function checkBulletCollision(bullet) {
                 bulletBox.y < playerBox.y + playerBox.height &&
                 bulletBox.y + bulletBox.height > playerBox.y
             ) {
-                //console.log(`Bullet hit ${player.id}!`);
+                console.log(`Bullet hit ${player.id}!`);
                 handlePlayerHit(player, bullet); // Pass bullet position to explosion
                 return true; // Collision detected
             }
@@ -831,13 +841,12 @@ function checkBulletCollision(bullet) {
 }
 
 function handlePlayerHit(player, bullet) {
-    //console.log(`${player.id} was hit!`);
 
+    //console.log(`${player.id} was hit!`);
     // Decrease health
     if (player.id === playerId) {
         health -= 20;
         updateHUD(score, health, time, playerName);
-        //  Send player health to the BE
     }
 
     player.dataset.health -= 20;
@@ -880,14 +889,13 @@ function handlePlayerHit(player, bullet) {
 
         // Remove tank after a short delay for a smoother explosion effect
         setTimeout(() => {
-            player.remove();
+            player.remove(); //TODO: need to give somebody points for the kill.
             delete players[player.id]; // Remove from the players object
             playersAlive--;
             if (playersAlive === 1) {
                 if (playerId != player.id) {
                     score++;
                     updateHUD(score, health, time, playerName);
-                    //TODO: implement starting the next round until the timer runs out
                     ws.send(JSON.stringify({ type: "updateScoreboard", playerName, score }));
                     ws.send(JSON.stringify({ type: "startNextRound" }));
                 }

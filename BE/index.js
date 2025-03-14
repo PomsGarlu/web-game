@@ -63,10 +63,9 @@ server.on("connection", (ws) => {
     ws,
   };
 
-
   /**
    * activePlayers holds a list of players that are currently connected to the game.
-   * 
+   *
    * @type {Player}
    *
    *@param {string} playerId - The player's ID.
@@ -78,22 +77,27 @@ server.on("connection", (ws) => {
    *@param {number} score - The player's score.
    */
 
-   activePlayers.push(
+  activePlayers.push(
     new Player(
-      `player${playerCounter}`, 
-      "",spawnPoints[(playerCounter - 1) % spawnPoints.length].x, 
+      `player${playerCounter}`,
+      "",
+      spawnPoints[(playerCounter - 1) % spawnPoints.length].x,
       spawnPoints[(playerCounter - 1) % spawnPoints.length].y,
       100,
-      spawnPoints[(playerCounter - 1) % spawnPoints.length].y < 100 ? "down" : "up",
-      0)
+      spawnPoints[(playerCounter - 1) % spawnPoints.length].y < 100
+        ? "down"
+        : "up",
+      0
+    )
   );
-  console.log("Active Player added", activePlayers[playerCounter-1]); // shows the added player 
+  console.log("Active Player added", activePlayers[playerCounter - 1]); // shows the added player
 
   ws.send(JSON.stringify({ type: "assignPlayerId", playerId }));
   broadcastLobby();
 
   ws.on("message", (message) => {
     const data = JSON.parse(message);
+
     if (data.type === "timer") {
       timerOperations(data.status);
     }
@@ -102,6 +106,15 @@ server.on("connection", (ws) => {
       console.log("data");
       players[playerId].name = data.name;
       broadcastLobby();
+    }
+
+    if (data.type === "updateHp") {
+      activePlayers.forEach((player) => {
+        if (player.playerId === data.playerId) {
+          player.hp = data.hp;
+          broadcast({ type: "updateHp", playerId: data.playerId, hp: data.hp });
+        }
+      });
     }
 
     if (data.type === "startNextRound") {
@@ -197,6 +210,8 @@ server.on("connection", (ws) => {
     broadcastLobby();
   });
 });
+
+// FUNCTIONS
 
 function broadcast(data) {
   if (!data.type === "time") {
