@@ -18,13 +18,13 @@ let activePlayers = [];
 let runningTimer = false;
 let pausedTimer = false;
 
-// Sets a tick sending the time to the front end every 500ms
+// Sets a tick sending the time to the front end every 500ms also sends the player data
 setInterval(() => {
   time = timer.getElapseTime(pausedTimer);
   if (time > -1) {
     broadcast({ type: "time", time, activePlayers }); // ; // send the time to the front end if -1 meaning the timer is not running, this sends also the active player data we are interested in the health and score
   }
-}, 500);
+}, 10); // 60fps
 
 server.on("connection", (ws) => {
   if (!singlePlayer) {
@@ -76,7 +76,6 @@ server.on("connection", (ws) => {
    *@param {string} direction - The player's direction.
    *@param {number} score - The player's score.
    */
-
   activePlayers.push(
     new Player(
       `player${playerCounter}`,
@@ -90,6 +89,7 @@ server.on("connection", (ws) => {
       0
     )
   );
+
   console.log("Active Player added", activePlayers[playerCounter - 1]); // shows the added player
 
   ws.send(JSON.stringify({ type: "assignPlayerId", playerId }));
@@ -109,10 +109,21 @@ server.on("connection", (ws) => {
     }
 
     if (data.type === "updateHp") {
+      console.log("HP Update", data);
       activePlayers.forEach((player) => {
         if (player.playerId === data.playerId) {
           player.hp = data.hp;
           broadcast({ type: "updateHp", playerId: data.playerId, hp: data.hp });
+        }
+      });
+    }
+
+    if (data.type === "updateScore") {
+      console.log("Score Update", data);
+      activePlayers.forEach((player) => {
+        if (player.playerId === data.playerId) {
+          player.score += data.score;
+          console.log("Player stats", player);
         }
       });
     }

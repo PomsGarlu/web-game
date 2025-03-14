@@ -13,6 +13,8 @@ bulletExplosion.volume = 1;
 const tankExplosion = new Audio("./audio/tank_exp.wav");
 tankExplosion.volume = 0.1;
 
+
+// make the collision boxes smaller
 const obstacles = [
     { x: 700, y: 230, width: 71.2, height: 100, image: "./images/rock_1.png" },
     { x: 220, y: 70, width: 96.6, height: 121.65, image: "./images/rock_2.png" },
@@ -82,6 +84,7 @@ let health = 100;
 let time = 0;
 let playersAlive = null;
 let isRoundOver = false;
+let activePlayers = [];
 
 document.addEventListener("DOMContentLoaded", () => {
     displayMenu();
@@ -115,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // timer Controls for testing 
+    /* timer Controls for testing NOT USED
     const pauseTimerButton = document.getElementById("pauseT");
     const startTimerButton = document.getElementById("startT");
     const stopTimerButton = document.getElementById("stopT");
@@ -137,7 +140,8 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("resume timer");
         ws.send(JSON.stringify({ type: "timer", status:"resume"}));
     });
-
+    */
+    
 });
 
 const lobby = document.getElementById("lobby"); // TODO: moved to menu.js
@@ -153,8 +157,9 @@ ws.onmessage = (event) => {
     // Handle time input from the backend.
     if (data.type === "time") {
         time = data.time;
-        console.log("Time:", time);
-        // update HUD timer
+        activePlayers = data.activePlayers;
+        // console.log("Time:", time);
+        // console.log("update from time",activePlayers);
     }
 
     if (data.type === "assignPlayerId") {
@@ -166,6 +171,10 @@ ws.onmessage = (event) => {
     //     playerId = data.playerId;
     //     let newHp = data.health;
     //     // Update Player health;
+    // }
+
+    // if (data.type === "updateScoreboard") {
+    //     updateScoreboard(data.playerName, data.playerScore);
     // }
 
     if (data.type === "move") {
@@ -381,11 +390,13 @@ ws.onclose = () => {
 };
 
 
+// GAME LOOP
 function gameLoop() {
     if (isRoundOver) {
         startNextRound();
     } else {
         updateHUDTimer(time);
+        // Update activePlayers from BE
         updateLocalPlayer();
         updateBullets();
         requestAnimationFrame(gameLoop);
@@ -444,7 +455,6 @@ function startNextRound() {
             } else {
                 //console.log("Arena does not exist");
             }
-
             arena.appendChild(img);
         }
     });
@@ -477,19 +487,16 @@ document.addEventListener("keydown", (e) => {
     if (gameRunning && !gamePaused) {
         keys[e.key] = true;
     }
-
     // Esc to pause game
     if (e.key === "Escape") {
         if (gameRunning && !gamePaused) {
             ws.send(JSON.stringify({ type: "sendPauseGame", whoPaused: playerName }));
         }
     }
-
     if (e.key === "Tab") {
         e.preventDefault(); // Prevents default tab behavior (switching focus)
         displayScoreboard();
     }
-
     if (e.key === " ") {
         if (gameRunning && !gamePaused) {
             const now = Date.now();
@@ -686,7 +693,7 @@ function shootBullet(pId, direction) {
     // Get player position
     let bulletX = parseFloat(player.getAttribute("x")) + 8;
     let bulletY = parseFloat(player.getAttribute("y")) - 15;
-
+    let shooter = player.id; // TODO make sure this is saved in the backend
     let velocityX = 0;
     let velocityY = 0;
     let angle = 0; // Default is facing "up"
@@ -762,6 +769,7 @@ function shootBullet(pId, direction) {
         element: bullet,
         x: bulletX,
         y: bulletY,
+        shooter: shooter, // saves the shooter of the bullet
         vx: velocityX,
         vy: velocityY,
     });
@@ -841,9 +849,9 @@ function checkBulletCollision(bullet) {
 }
 
 function handlePlayerHit(player, bullet) {
-
-    //console.log(`${player.id} was hit!`);
+    console.log("Player hit:", player.id, "bullet:", bullet.shooter);
     // Decrease health
+
     if (player.id === playerId) {
         health -= 20;
         updateHUD(score, health, time, playerName);
@@ -896,6 +904,9 @@ function handlePlayerHit(player, bullet) {
                 if (playerId != player.id) {
                     score++;
                     updateHUD(score, health, time, playerName);
+                    // This is the new score by HS
+                    ws.send(JSON.stringify({ type: "updateScore", playerId: bullet.shooter, score:10}));
+                    // This is the old score by KH
                     ws.send(JSON.stringify({ type: "updateScoreboard", playerName, score }));
                     ws.send(JSON.stringify({ type: "startNextRound" }));
                 }
@@ -914,7 +925,8 @@ function handlePlayerHit(player, bullet) {
         explosion.setAttribute("x", explosionX);
         explosion.setAttribute("y", explosionY);
         bulletExplosion.play();
-
+        // should send the player id of the shooter to the and give them 10 points.
+        ws.send(JSON.stringify({ type: "updateScore", playerId: bullet.shooter, score:10}));
         // Add explosion to the arena
         document.getElementById("arena").appendChild(explosion);
 
