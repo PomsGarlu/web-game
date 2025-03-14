@@ -19,6 +19,8 @@ class HUDcontent {
  */
 
 export function updateHUD(hudScore, hudHealth, hudTimer, hudName) {
+    console.log("HUD update", hudScore, hudHealth, hudTimer, hudName);
+    
     content = `
     <div>Score: ${hudScore ? hudScore : "0"}</div>
     <div>Health: ${hudHealth ? hudHealth : "0"}</div>

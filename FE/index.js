@@ -26,20 +26,22 @@ const obstacles = [
     { x: 370, y: 306, width: 40, height: 35, image: "" },
 ];
 
-// Create an audio element for ambient sound
-const ambientSound = new Audio("./audio/ambient.wav"); // Replace with your actual file path
-ambientSound.loop = true; // Ensure the sound loops continuously
+
+const ambientSound = new Audio("./audio/menu_beat_2_27.mp3"); 
+ambientSound.loop = true; 
 ambientSound.volume = 0.03; // Adjust volume (0.0 to 1.0)
 
-// Start playing ambient sound when the game loads
+
+
+// Disabled background music for now
 window.addEventListener("load", () => {
-    ambientSound.play().catch((error) => console.log("Audio playback error:", error));
+    // ambientSound.play().catch((error) => console.log("Audio playback error:", error));
 });
 
 document.addEventListener("click", () => {
-    if (ambientSound.paused) {
-        ambientSound.play().catch((error) => console.log("Audio playback error:", error));
-    }
+    // if (ambientSound.paused) {
+    //     ambientSound.play().catch((error) => console.log("Audio playback error:", error));
+    // }
 });
 
 function displayObstacles() {
@@ -88,6 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const waitingMessage = document.getElementById("waitingMessage");
     arena = document.getElementById("arena");
     startButton = document.getElementById("startGame");
+
     nameForm.onclick = (e) => {
         //console.log("nameForm submitted");
         e.preventDefault();
@@ -109,6 +112,30 @@ document.addEventListener("DOMContentLoaded", () => {
             //console.log("playerIdList:", playerIdList, "playerNameList:", playerNameList);
         }
     });
+
+    // timer Controls
+    const pauseTimerButton = document.getElementById("pauseT");
+    const startTimerButton = document.getElementById("startT");
+    const stopTimerButton = document.getElementById("stopT");
+    const resumeTimerButton = document.getElementById("resumeT");
+
+    pauseTimerButton.addEventListener("click", () => {
+        console.log("pause timer");
+        ws.send(JSON.stringify({ type: "timer", "pause": true }));
+    });
+    startTimerButton.addEventListener("click", () => {
+        console.log("start timer"); 
+        ws.send(JSON.stringify({ type: "timer", "start": true }));
+    });
+    stopTimerButton.addEventListener("click", () => {
+        console.log("stop timer");
+        ws.send(JSON.stringify({ type: "timer", "stop": true }));
+    });
+    resumeTimerButton.addEventListener("click", () => {
+        console.log("resume timer");
+        ws.send(JSON.stringify({ type: "timer", "resume": true }));
+    });
+
 });
 
 const lobby = document.getElementById("lobby"); // TODO: moved to menu.js
@@ -128,6 +155,12 @@ ws.onmessage = (event) => {
 
     if (data.type === "time") {
         time = data.time;
+        console.log("Time:", time);
+    }
+
+    if (data.type === "tick") {
+        time = data.tick;
+        console.log("tick:", time);
     }
 
     if (data.type === "assignPlayerId") {

@@ -6,6 +6,7 @@
 let elapseTime = 0; // in milliseconds
 let pauseStartTime = 0; // in milliseconds
 let startTime = 0; // in milliseconds
+let timerRunning = false;
 let duration = 2 * 60 * 1000; // 10 minutes
 /** @type {boolean} */
 
@@ -33,6 +34,7 @@ function resumeTimer() {
   if (!isPaused) {
     return;
   }
+
   elapseTime += getTimeNow() - pauseStartTime; // add the time that was paused to the elapse time.
   startTime = getTimeNow(); // sa
   pauseStartTime = 0;
@@ -49,11 +51,13 @@ function stopTimer() {
   elapseTime = 0;
   pauseStartTime = 0;
   startTime = 0;
+  timerRunning = false;
 }
 
 function startTimer() {
   isPaused = false; // hard reset for the Pause should be done externally, but this is a safety measure.
   startTime = getTimeNow();
+  timerRunning = true;
 }
 
 /**
@@ -63,8 +67,10 @@ function startTimer() {
 function getElapseTime() {
   if (isPaused) {
     return elapseTime;
-  } else {
+  } if (timerRunning) {
     return elapseTime + (getTimeNow() - startTime); // stores the time that has passed since the last call to elapseTime
+  } else {
+    return -1;
   }
 }
 

@@ -1,5 +1,4 @@
 const timer = require("./src/utils/timer.js");
-
 const WebSocket = require("ws");
 const port = process.env.PORT || 8080;
 const server = new WebSocket.Server({ port });
@@ -9,25 +8,35 @@ let gameRunning = false;
 let playerCounter = 0;
 let time = 0;
 let gameOver = false;
+let tick = 0;
 
+
+//  console.log("Server started on port",timer.getTimeNow());
 
 // Sets a tick to send data to the front end.
 setInterval(() => {
+  // console.log("Ellapse time",timer.getElapseTime());
+  tick++;
+  // console.log("Time is running ",timer.getElapseTime());
   if (!timer.checkDuration()) { // if the time is up
     gameOver = true;
     broadcast({ type: "gameOver", gameOver }); // send the game over message to the front end
   }
   if (gameRunning) {
-    time = timer.getTimeNow(); // get the current time
+    // time = timer.getElapseTime(); // get the current time
     broadcast({ type: "time", time }); // send the time to the front end
   }
   if (!gameRunning) {
     // does not get a new time if paused
-    broadcast({ type: "time", time }); // send the time to the front end
+    broadcast({ type: "tick", tick }); // send the time to the front end
   } else {
-    timeDefault = 0;
+    timeZero = 0;
     broadcast({ type: "time", timeZero }); // if for some reason the game is not running nor paused, send 0
   }
+
+  if (gameOver) {
+  }
+
 }, 1000);
 
 
@@ -48,15 +57,19 @@ server.on("connection", (ws) => {
     { x: 1314, y: 708 },
   ];
 
+
+
   players[playerId] = {
     playerId: playerId,
     name: null,
     x: spawnPoints[(playerCounter - 1) % spawnPoints.length].x,
     y: spawnPoints[(playerCounter - 1) % spawnPoints.length].y,
     hp: 100,
-    direction: "up",
+    direction: "up",   // need to change the direction for the player on the bottom or top.
     ws,
   };
+
+
 
   ws.send(JSON.stringify({ type: "assignPlayerId", playerId }));
   broadcastLobby();
@@ -65,6 +78,11 @@ server.on("connection", (ws) => {
   ws.on("message", (message) => {
     const data = JSON.parse(message);
 
+
+    if (data.type === "timer") {
+      console.log("Timer", data);
+    }
+
     if (data.type === "selectName") {
       console.log("data");
       players[playerId].name = data.name;
@@ -72,7 +90,7 @@ server.on("connection", (ws) => {
     }
 
     if (data.type === "startNextRound") {
-      // restart Timer
+      console.log("Next Round");
       timer.resetTimer();
       broadcast({
         type: "nextRound",
@@ -85,11 +103,13 @@ server.on("connection", (ws) => {
     if (data.type === "sendPauseGame") {
       broadcast({ type: "pauseGame", whoPaused: data.whoPaused });
       timer.pauseTimer();
+      console.log("Game Paused");
     }
 
     if (data.type === "sendResumeGame") {
       broadcast({ type: "resumeGame" });
       timer.resumeTimer();
+      console.log("Game Resumed");
     }
 
     if (data.type === "sendQuitNotifier") {
@@ -98,6 +118,7 @@ server.on("connection", (ws) => {
         quittingPlayer: data.quittingPlayer,
         quittingPlayerId: data.quittingPlayerId,
       });
+      console.log("Player Quit");
     }
 
     if (data.type === "sendWinNotifier") {
@@ -107,6 +128,8 @@ server.on("connection", (ws) => {
         winnerScore: data.winnerScore,
       });
       timer.stopTimer();
+      gameOver = true;
+      console.log("Game Over");
     }
 
     if (data.type === "updateScoreboard") {
@@ -115,15 +138,19 @@ server.on("connection", (ws) => {
         playerName: data.playerName,
         playerScore: data.score,
       });
+      //  Add updated player score to the player object
+      console.log("Scoreboard Updated", data.playerName,"Score" ,data.score);
     }
 
     if (data.type === "move") {
-      if (!players[data.playerId]) return; // Ensure player exists
 
+      
+      if (!players[data.playerId]) return; // Ensure player exists
+    
       players[data.playerId].x += data.x;
       players[data.playerId].y += data.y;
       players[data.playerId].direction = data.direction;
-
+      //  Add updated player position to the player object
       broadcast({
         type: "move",
         playerId: data.playerId,
@@ -145,6 +172,7 @@ server.on("connection", (ws) => {
 
     if (data.type === "startGame") {
       gameRunning = true;
+      console.log("Game Started");
       timer.startTimer();
       broadcast({ type: "gameStart", players: getPlayersWithoutWs() });
     }

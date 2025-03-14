@@ -1,8 +1,12 @@
 todo -> toggle of different modes from the front end.
-todo ->  
+todo  ->
+todo  ->  
+
 todo  -> timer
+
+
 todo  -> Main menu
-        ->Loby 
+        ->Loby OK modify the creation screen to look nice  
 todo  -> Pause Menu  
             --> Restart 
             --> exist
