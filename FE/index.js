@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // timer Controls
+    // timer Controls for testing
     const pauseTimerButton = document.getElementById("pauseT");
     const startTimerButton = document.getElementById("startT");
     const stopTimerButton = document.getElementById("stopT");
@@ -121,19 +121,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     pauseTimerButton.addEventListener("click", () => {
         console.log("pause timer");
-        ws.send(JSON.stringify({ type: "timer", "pause": true }));
+        ws.send(JSON.stringify({ type: "timer", status:"pause"}));
     });
     startTimerButton.addEventListener("click", () => {
         console.log("start timer"); 
-        ws.send(JSON.stringify({ type: "timer", "start": true }));
+        ws.send(JSON.stringify({ type: "timer", status:"start"}));
     });
     stopTimerButton.addEventListener("click", () => {
         console.log("stop timer");
-        ws.send(JSON.stringify({ type: "timer", "stop": true }));
+        ws.send(JSON.stringify({ type: "timer", status:"stop"}));
     });
     resumeTimerButton.addEventListener("click", () => {
         console.log("resume timer");
-        ws.send(JSON.stringify({ type: "timer", "resume": true }));
+        ws.send(JSON.stringify({ type: "timer", status:"resume"}));
     });
 
 });
