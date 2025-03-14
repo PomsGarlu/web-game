@@ -22,26 +22,29 @@ export function updateHUD(hudScore, hudHealth, hudTimer, hudName) {
     console.log("HUD update", hudScore, hudHealth, hudTimer, hudName);
     
     content = `
-    <div>Score: ${hudScore ? hudScore : "0"}</div>
-    <div>Health: ${hudHealth ? hudHealth : "0"}</div>
-    <div>Timer: ${hudTimer ? hudTimer : "0"}</div>
-    <div>Player: ${hudName ? hudName : "No name yet"}</div>
+    <div id='score'>Score: ${hudScore ? hudScore : "0"}</div>
+    <div id='health' >Health: ${hudHealth ? hudHealth : "0"}</div>
+    <div id='time'>Timer: ${hudTimer ? hudTimer : "0"}</div>
+    <div id='playerName' >Player: ${hudName ? hudName : "No name yet"}</div>
 `;
     var hud = document.getElementById("hud");
 
     if (hud) {
         hud.innerHTML = content;
     } else {
-        (hud.innerHTML = "HUD element not found"), hud;
         console.log("HUD element not found", hud);
     }
 }
 
 function getHUDUpdate() {
-    // Listen to the WS for updates to the HUD.
-    // Check and pass the update to the updateHUD function.
-
     return HUDcontent;
+}
+ 
+export function updateHUDTimer(hudTimer){
+    var timer = document.getElementById("time");
+    if (timer) {
+        timer.innerHTML = `Timer: ${hudTimer}`;
+    }
 }
 
 function resetHUD() {

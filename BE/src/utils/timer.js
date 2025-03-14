@@ -59,7 +59,7 @@ function startTimer() {
  * @returns {number}
  */
 function getElapseTime(isPaused) {
-  console.log("isPaused from elapsed", isPaused);
+  // console.log("isPaused from elapsed", isPaused);
   // console.log( "elapseTime", getSeconds(elapseTime));
   // console.log("timerRunning", getSeconds(timerRunning));
   // console.log("startTime", getSeconds(startTime));

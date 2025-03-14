@@ -4,26 +4,21 @@ const port = process.env.PORT || 8080;
 const server = new WebSocket.Server({ port });
 
 let players = {};
-let gameRunning = false;
+let gameRunning = false; // not used at the moment
 let playerCounter = 0;
 let time = 0;
 let gameOver = false;
-let tick = 0;
 
 let runningTimer=false
-let stoppedTimer=false
 let pausedTimer=false
-let resumedTimer=false
-
-
-//  console.log("Server started on port",timer.getTimeNow());
 
 // Sets a tick to send data to the front end.
 setInterval(() => {
+  time = timer.getElapseTime(pausedTimer);
   if (time > -1 ){
     broadcast({ type: "time", time }); // send the time to the front end if -1 meaning the timer is not running 
   }
-}, 1000);
+}, 500);
 
 server.on("connection", (ws) => {
   if (Object.keys(players).length >= 4) {
@@ -51,12 +46,8 @@ server.on("connection", (ws) => {
     ws,
   };
 
-
-
-
-
   function timerOperations(timerSwitch) {
-    console.log("Timer Switch", timerSwitch);
+    // console.log("Timer Switch", timerSwitch);
     if (timerSwitch === "start" && !runningTimer && !pausedTimer) {
       runningTimer=true;
       pausedTimer=false;
@@ -102,7 +93,6 @@ server.on("connection", (ws) => {
 
     if (data.type === "startNextRound") {
       console.log("Next Round");
-      timer.resetTimer();
       broadcast({
         type: "nextRound",
         players: getPlayersWithoutWs(),
@@ -113,13 +103,11 @@ server.on("connection", (ws) => {
 
     if (data.type === "sendPauseGame") {
       broadcast({ type: "pauseGame", whoPaused: data.whoPaused });
-      // timer.pauseTimer();
       console.log("Game Paused");
     }
 
     if (data.type === "sendResumeGame") {
       broadcast({ type: "resumeGame" });
-      // timer.resumeTimer();
       console.log("Game Resumed");
     }
 
@@ -138,8 +126,6 @@ server.on("connection", (ws) => {
         winner: data.winner,
         winnerScore: data.winnerScore,
       });
-      // timer.stopTimer();
-      gameOver = true;
       console.log("Game Over");
     }
 
@@ -155,7 +141,6 @@ server.on("connection", (ws) => {
 
     if (data.type === "move") {
       if (!players[data.playerId]) return; // Ensure player exists
-
       players[data.playerId].x += data.x;
       players[data.playerId].y += data.y;
       players[data.playerId].direction = data.direction;
@@ -182,7 +167,6 @@ server.on("connection", (ws) => {
     if (data.type === "startGame") {
       gameRunning = true;
       console.log("Game Started");
-      // timer.startTimer();
       broadcast({ type: "gameStart", players: getPlayersWithoutWs() });
     }
   });
@@ -195,25 +179,23 @@ server.on("connection", (ws) => {
     broadcastLobby();
   });
 
-  //TODO: broadcastStatus
 });
 
 function broadcast(data) {
-  // console.log("data sent to the front", data);
+  if (!data.type === "time") {
+  console.log("data sent to the front", data);
+  }
   server.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify(data));
     }
   });
+
 }
 
 function broadcastLobby() {
   broadcast({ type: "gameState", players: getPlayersWithoutWs() });
 }
-
-// function broadcastGame() {
-//     broadcast({ type: "gameState", players: getPlayersWithoutWs() });
-// }
 
 function getPlayersWithoutWs() {
   const playersWithoutWs = {};

@@ -2,7 +2,7 @@ const ws = new WebSocket("ws://localhost:8080");
 import { C } from "./src/constants.js";
 import { displayMenu, hideMenu } from "./elements/menu.js";
 import { displayGame, gameOver, gamePaused, gameRunning, setGameStatus } from "./elements/game.js";
-import { displayHUD, updateHUD } from "./elements/hud.js";
+import { displayHUD, updateHUD, updateHUDTimer } from "./elements/hud.js";
 import { setScoreboard, displayScoreboard, updateScoreboard } from "./elements/scoreboard.js";
 import { displayPause, removePause } from "./elements/pause.js";
 
@@ -107,13 +107,15 @@ document.addEventListener("DOMContentLoaded", () => {
         setGameStatus("game");
         if (playerIdList.length >= 2 && playerIdList.length < 5 && playerNameList.length === playerIdList.length) {
             ws.send(JSON.stringify({ type: "startGame" }));
+            console.log("start multiplayer timer"); 
+            ws.send(JSON.stringify({ type: "timer", status:"start"}));
         } else {
             alert("Not all players are ready!");
             //console.log("playerIdList:", playerIdList, "playerNameList:", playerNameList);
         }
     });
 
-    // timer Controls for testing
+    // timer Controls for testing 
     const pauseTimerButton = document.getElementById("pauseT");
     const startTimerButton = document.getElementById("startT");
     const stopTimerButton = document.getElementById("stopT");
@@ -144,23 +146,15 @@ ws.onopen = () => {
     console.log("WebSocket connection established");
 };
 
-
-// if a message from the BE is received 
-//TODO: check what data is and in what structure is being sent.
-
-
 ws.onmessage = (event) => {
     const playersInLobby = document.getElementById("playersInLobby");
     const data = JSON.parse(event.data);
 
+    // Handle time input from the backend.
     if (data.type === "time") {
         time = data.time;
         console.log("Time:", time);
-    }
-
-    if (data.type === "tick") {
-        time = data.tick;
-        console.log("tick:", time);
+        // update HUD timer
     }
 
     if (data.type === "assignPlayerId") {
@@ -183,14 +177,19 @@ ws.onmessage = (event) => {
         }
         bullets.length = 0;
         setGameStatus("pause");
+        console.log("pause timer");
+        ws.send(JSON.stringify({ type: "timer", status:"pause"})); // Sends Pause timer to BE
         Object.keys(keys).forEach((key) => {
             keys[key] = false;
         });
         displayPause(gamePaused, data.whoPaused, handlePauseAction);
+
     }
 
     if (data.type === "resumeGame") {
         setGameStatus("game");
+        console.log("resume timer");
+        ws.send(JSON.stringify({ type: "timer", status:"resume"})); // Sends Resume timer to BE
         removePause(gamePaused);
     }
 
@@ -209,12 +208,16 @@ ws.onmessage = (event) => {
             playersAlive--;
             if (playersAlive === 1) {
                 ws.send(JSON.stringify({ type: "sendWinNotifier", winner: playerName, winnerScore: score }));
+                console.log("stop timer");
+                ws.send(JSON.stringify({ type: "timer", status:"stop"}));
             }
         }
     }
 
     if (data.type === "winNotifier") {
         alert(`Player ${data.winner} has won the game with a score of ${data.winnerScore}!`);
+        console.log("stop timer");
+        ws.send(JSON.stringify({ type: "timer", status:"stop"}));
         window.location.reload();
     }
 
@@ -241,14 +244,14 @@ ws.onmessage = (event) => {
         if (isLeader) {
             if (playerName) {
                 waitingMessage.textContent = `Your name is set as ${playerName} and you are the lobby leader.`;
-                //updateHUD(null, 100, null, playerName);
+                updateHUD(null, 100, null, playerName);
             } else {
                 waitingMessage.textContent = `You are the lobby leader. Please set your name!`;
             }
         } else {
             if (playerName) {
                 waitingMessage.textContent = `Your name is set as ${playerName}. Waiting for the lobby leader to start the game.`;
-                //updateHUD(null, 100, null, playerName);
+                updateHUD(null, 100, null, playerName);
             } else {
                 waitingMessage.textContent = `Please set your name!`;
             }
@@ -362,10 +365,14 @@ ws.onmessage = (event) => {
 
 ws.onerror = (error) => {
     console.error("WebSocket error:", error);
+    console.log("stop timer");
+    ws.send(JSON.stringify({ type: "timer", status:"stop"}));
 };
 
 ws.onclose = () => {
     console.log("WebSocket connection closed");
+    console.log("stop timer");
+    ws.send(JSON.stringify({ type: "timer", status:"stop"}));
 };
 
 // Game loop needs to get a tick?
@@ -373,6 +380,7 @@ function gameLoop() {
     if (isRoundOver) {
         startNextRound();
     } else {
+        updateHUDTimer(time);
         updateLocalPlayer();
         updateBullets();
         requestAnimationFrame(gameLoop);
@@ -827,6 +835,7 @@ function handlePlayerHit(player, bullet) {
     if (player.id === playerId) {
         health -= 20;
         updateHUD(score, health, time, playerName);
+        //  Send player health to the BE
     }
 
     player.dataset.health -= 20;
@@ -850,7 +859,6 @@ function handlePlayerHit(player, bullet) {
 
     if (player.dataset.health <= 0) {
         //console.log(`${player.id} is eliminated!`);
-
         // Use "Explosion53.gif" for destroyed tanks
         const tankExplosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
         tankExplosion.setAttribute("href", "./images/Explosion53.gif");
@@ -953,16 +961,25 @@ function updateBullets() {
     }
 }
 
+
+
 function handlePauseAction(action) {
     if (action === "resume") {
         ws.send(JSON.stringify({ type: "sendResumeGame" }));
+
+        console.log("resume timer");
+        ws.send(JSON.stringify({ type: "timer", status:"resume"}));
     }
 
     if (action === "restart") {
         ws.send(JSON.stringify({ type: "startNextRound", fullReset: true, resetBy: playerName }));
+        console.log("stop timer");
+        ws.send(JSON.stringify({ type: "timer", status:"stop"}));
     }
 
     if (action === "quit") {
         ws.send(JSON.stringify({ type: "sendQuitNotifier", quittingPlayer: playerName, quittingPlayerId: playerId }));
+        console.log("stop timer");
+        ws.send(JSON.stringify({ type: "timer", status:"stop"}));
     }
 }
