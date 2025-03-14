@@ -24,7 +24,7 @@ setInterval(() => {
   if (time > -1) {
     broadcast({ type: "time", time, activePlayers }); // ; // send the time to the front end if -1 meaning the timer is not running, this sends also the active player data we are interested in the health and score
   }
-}, 10); // 60fps
+}, 1000);
 
 server.on("connection", (ws) => {
   if (!singlePlayer) {
