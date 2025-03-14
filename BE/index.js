@@ -20,32 +20,9 @@ let resumedTimer=false
 
 // Sets a tick to send data to the front end.
 setInterval(() => {
-  // console.log("Ellapse time",timer.getElapseTime());
-  tick++;
-  // console.log("Time is running ",timer.getElapseTime());
-  if (!timer.checkDuration()) {
-    // if the time is up
-    gameOver = true;
-    broadcast({ type: "gameOver", gameOver }); // send the game over message to the front end
+  if (time > -1 ){
+    broadcast({ type: "time", time }); // send the time to the front end if -1 meaning the timer is not running 
   }
-  if (gameRunning) {
-    // time = timer.getElapseTime(); // get the current time
-    broadcast({ type: "time", time }); // send the time to the front end
-  }
-  if (!gameRunning) {
-    // does not get a new time if paused
-    broadcast({ type: "tick", tick }); // send the time to the front end
-  } else {
-    timeZero = 0;
-    broadcast({ type: "time", timeZero }); // if for some reason the game is not running nor paused, send 0
-  }
-
-  if (gameOver) {
-  }
-  console.log("Timer count ", timer.getElapseTime(pausedTimer));
-  // console.log("Timer is running", runningTimer);
-  // console.log("Timer is Paused", pausedTimer);
-
 }, 1000);
 
 server.on("connection", (ws) => {
