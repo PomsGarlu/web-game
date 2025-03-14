@@ -6,5 +6,5 @@ export const C = {
     PLAYER_SIZE_X: 26,
     PLAYER_SIZE_Y: 52,
     BULLET_SPEED: 5, // changed to 5 from 3
-    GAME_DURATION: 200, // duration of the game in seconds 
+    GAME_DURATION: 200, // duration of the game in seconst 
 };

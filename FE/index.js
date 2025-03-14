@@ -929,6 +929,7 @@ function handlePlayerHit(player, bullet) {
   console.log("Player hit:", player.id, "bullet:", bullet.shooter);
   // Decrease health
 
+
   if (player.id === playerId) {
     health -= 20;
     updateHUD(score, health, time, playerName);
@@ -939,6 +940,9 @@ function handlePlayerHit(player, bullet) {
 
   // Update the player's `data-health` attribute (optional for debugging)
   player.setAttribute("data-health", player.dataset.health);
+
+  ws.send(JSON.stringify({ type: "updateHp", playerId: player.id ,hp: 100 }));
+
 
   // Apply glow effect
   player.style.filter = "brightness(2)";
@@ -989,16 +993,20 @@ function handlePlayerHit(player, bullet) {
           updateHUD(score, health, time, playerName);
           // This is the new score by HS
           ws.send(
-            JSON.stringify({
-              type: "updateScore",
-              playerId: bullet.shooter,
-              score: 10,
+                    JSON.stringify({
+                    type: "updateScore",
+                    playerId: bullet.shooter,
+                    score: 100,
             })
           );
+          ws.send(JSON.stringify({ type: "updateHp", playerId: player.id ,hp: 0})); // when you die set health to 0
           // This is the old score by KH
           ws.send(
             JSON.stringify({ type: "updateScoreboard", playerName, score })
           );
+
+          //TODO: respawn player
+          console.log("Respawn player:", player.id);
           ws.send(JSON.stringify({ type: "startNextRound" }));
         }
       }
@@ -1024,6 +1032,8 @@ function handlePlayerHit(player, bullet) {
         score: 10,
       })
     );
+    
+    ws.send(JSON.stringify({ type: "updateHp", playerId: player.id ,hp: 20})); // reduce health by 20
     // Add explosion to the arena
     document.getElementById("arena").appendChild(explosion);
 

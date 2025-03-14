@@ -90,8 +90,7 @@ server.on("connection", (ws) => {
     )
   );
 
-  console.log("Active Player added", activePlayers[playerCounter - 1]); // shows the added player
-
+  // console.log("Active Player added", activePlayers[playerCounter - 1]); // shows the added player
   ws.send(JSON.stringify({ type: "assignPlayerId", playerId }));
   broadcastLobby();
 
@@ -107,29 +106,32 @@ server.on("connection", (ws) => {
       players[playerId].name = data.name;
       broadcastLobby();
     }
-
+//TODO: send in the health  from the front end not the delta
     if (data.type === "updateHp") {
-      console.log("HP Update", data);
+      console.log("HP Update:", data);
       activePlayers.forEach((player) => {
         if (player.playerId === data.playerId) {
-          player.hp = data.hp;
-          broadcast({ type: "updateHp", playerId: data.playerId, hp: data.hp });
+          player.health -= data.hp; // subtract the hp from the player
+          console.log("Player" , player);
+          console.log("Player reduction", player.hp);
+          // console.log("Player stats", player);
+          // broadcast({ type: "updateHp", playerId: data.playerId, hp: data.hp }); // This is probably not needed
         }
       });
     }
 
     if (data.type === "updateScore") {
-      console.log("Score Update", data);
       activePlayers.forEach((player) => {
         if (player.playerId === data.playerId) {
           player.score += data.score;
-          console.log("Player stats", player);
+          // console.log("Player stats", player);
         }
       });
     }
 
     if (data.type === "startNextRound") {
       console.log("Next Round");
+      activePlayers=[] // clear the active players
       let playersWithoutWs = getPlayersWithoutWs();
       console.log("Players Without WS", playersWithoutWs);
       broadcast({
@@ -218,6 +220,7 @@ server.on("connection", (ws) => {
   ws.on("close", () => {
     console.log("Player Disconnected");
     delete players[playerId];
+
     broadcastLobby();
   });
 });

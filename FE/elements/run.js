@@ -6,7 +6,7 @@ if (!runDiv) {
 }
 // Initiates the  players for the run
 export function initiateRunContainer(activePlayers) {
-    console.log("initiateRunContainer");
+
     let content = "";
     activePlayers.forEach(player => {
         content += `<div class="runStat" id="${player.playerId}+${player.name}"> Player: ${player.name}  Health :${player.health}  Score: ${player.score} </div>`;
