@@ -1,6 +1,6 @@
-export let gameRunning = false; 
-export let gamePaused = false; 
-export let gameOver = false; 
+export let gameRunning = false;
+export let gamePaused = false;
+export let gameOver = false;
 
 export function displayGame() {
     if (gameOver) {
@@ -33,6 +33,7 @@ export function displayGameScore() {
     let content = `<h1>The game has ended! These are the final results:</h1>
     <h3>The player with the highest score is the winner</h3>`;
     content += scoreboard.innerHTML;
+    content += `<h3>Returning to the lobby after 10 seconds.</h3>`;
     game.style.display = "flex";
     game.innerHTML = content;
     hud.style.display = "none";

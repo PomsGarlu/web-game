@@ -198,7 +198,7 @@ ws.onmessage = (event) => {
     if (data.type === "resumeGame") {
         setGameStatus("game");
         console.log("resume timer");
-        ws.send(JSON.stringify({ type: "timer", status: "resume" })); 
+        ws.send(JSON.stringify({ type: "timer", status: "resume" }));
         removePause(gamePaused);
     }
 
@@ -213,7 +213,7 @@ ws.onmessage = (event) => {
             let quitPlayer = document.getElementById(data.quittingPlayerId);
             console.log(quitPlayer);
             quitPlayer.remove();
-            delete players[playerId]; 
+            delete players[playerId];
             playersAlive--;
             if (playersAlive === 1) {
                 setGameStatus("over");
@@ -436,7 +436,6 @@ function startNextRound() {
 
             arena = document.getElementById("arena");
             if (arena) {
-
                 arena.appendChild(img);
             } else {
                 console.log("Arena does not exist");
@@ -515,7 +514,6 @@ function isColliding(x, y, width, height) {
 }
 
 function checkRectCollision(x1, y1, width1, height1, obstacle) {
-
     const obstacleX = parseFloat(obstacle.getAttribute("x"));
     const obstacleY = parseFloat(obstacle.getAttribute("y"));
     const obstacleWidth = parseFloat(obstacle.getAttribute("width"));
@@ -745,7 +743,7 @@ function shootBullet(pId, direction) {
         element: bullet,
         x: bulletX,
         y: bulletY,
-        shooter: shooter, 
+        shooter: shooter,
         vx: velocityX,
         vy: velocityY,
     });
@@ -862,7 +860,7 @@ function handlePlayerHit(player, bullet) {
         tankExplosion.setAttribute("href", "./images/Explosion53.gif");
         tankExplosion.setAttribute("width", "100"); // Adjust size as needed
         tankExplosion.setAttribute("height", "100");
-    // Center explosion on tank
+        // Center explosion on tank
         const tankX = player.x.baseVal.value - 25; // Offset to center
         const tankY = player.y.baseVal.value - 25; // Offset to center
 
@@ -871,7 +869,7 @@ function handlePlayerHit(player, bullet) {
         // Add explosion to the arena
         document.getElementById("arena").appendChild(tankExplosion);
         setTimeout(() => {
-            player.remove(); 
+            player.remove();
             delete players[player.id]; // Remove from the players object
             playersAlive--;
             if (playersAlive === 1) {

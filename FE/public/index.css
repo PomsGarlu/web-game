@@ -61,6 +61,7 @@ form {
   flex-direction: column;
   text-align: center;
   margin: 20px;
+  margin-bottom: 3px;
   max-width: fit-content;
   display: none;
 }
@@ -74,6 +75,7 @@ form {
   flex-direction: row;
   text-align: center;
   margin: 20px;
+  margin-top: 3px;
   max-width: fit-content;
   display:none;
 }
