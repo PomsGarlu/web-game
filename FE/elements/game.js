@@ -40,11 +40,13 @@ export function displayGameScore() {
     //TODO: create a  getScores() function that returns the scores
     let scoreboard = document.getElementById("scoreboard");
     let game = document.getElementById("game");
-    let content = "<h1>The game has ended! These are the final results:</h1>";
+    let hud = document.getElementById("hud");
+    let content = `<h1>The game has ended! These are the final results:</h1>
+    <h3>The player with the highest score is the winner</h3>`;
     content += scoreboard.innerHTML;
     game.style.display = "flex";
     game.innerHTML = content;
-    // add a time out for quit
+    hud.style.display = "none";
 }
 
 export function setGameStatus(status) {

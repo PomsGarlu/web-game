@@ -1,3 +1,5 @@
+// This is not used in the current version of the game
+
 let runDiv = document.getElementById("run");
 let count = 0;
 

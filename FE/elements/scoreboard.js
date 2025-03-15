@@ -1,4 +1,3 @@
-// Will contain the score, health, timer and other such elements.
 let content = "";
 
 export function updateScoreboard(playerName, playerScore) {
