@@ -965,7 +965,7 @@ function handlePauseAction(action) {
                 resetBy: playerName,
             })
         );
-        ws.send(JSON.stringify({ type: "timer", status: "stop" }));
+        ws.send(JSON.stringify({ type: "timer", status: "reset" }));
     }
 
     if (action === "quit") {
