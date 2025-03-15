@@ -2,7 +2,7 @@ const timer = require("./src/utils/timer.js");
 const Player = require("./src/models/player.js");
 const WebSocket = require("ws");
 const port = process.env.PORT || 8080;
-const server = new WebSocket.Server({ port });
+const server = new WebSocket.Server({ host: "0.0.0.0", port });
 const GAME_TIME = 180; // number
 
 let players = {};

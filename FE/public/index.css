@@ -84,7 +84,7 @@ form {
   display: none;
   position: absolute;
   left: 50%;
-  transform: translate(-50%, -350%);
+  transform: translate(-50%, -250%);
   border: #444 5px solid;
   border-radius: 10px;
   justify-content: center;
