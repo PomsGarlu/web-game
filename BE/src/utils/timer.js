@@ -26,12 +26,7 @@ function pauseTimer() {
 }
 
 function resumeTimer() {
-  // console.log("Resume Timer");
-  // console.log("paused Time ", pauseStartTime);
-  // let elapsePause = getTimeNow() - pauseStartTime;
-  // console.log("elapsed pause time", getSeconds(elapsePause));
-  // console.log("Start Time ", startTime);
-  // // elapseTime -= elapsePause; // add the time that was paused to the elapse time.
+
   startTime = getTimeNow(); // sa
   pauseStartTime = 0;
 }
@@ -59,11 +54,6 @@ function startTimer() {
  * @returns {number}
  */
 function getElapseTime(isPaused) {
-  // console.log("isPaused from elapsed", isPaused);
-  // console.log( "elapseTime", getSeconds(elapseTime));
-  // console.log("timerRunning", getSeconds(timerRunning));
-  // console.log("startTime", getSeconds(startTime));
-  // console.log("pauseStartTime", getSeconds(pauseStartTime));
 
   if (isPaused) {
     let timeInSeconds = getSeconds(elapseTime);
@@ -86,7 +76,6 @@ function checkDuration() {
 }
 
 function getSeconds(time) {
-  // console.log("Time", Math.floor(time / 1000));
   return Math.floor(time / 1000);
 }
 

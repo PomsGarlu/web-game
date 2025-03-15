@@ -1,4 +1,4 @@
-// Set to be first prompt to be able to select  a single player or multiplayer game
+// NOT USED IN THIS VERSION
 
 export let isModeSelected = false; //
 export let isMultiplayer = true; //

@@ -5,7 +5,6 @@ import { displayGame, gameOver, gamePaused, gameRunning, setGameStatus } from ".
 import { displayHUD, updateHUD, updateHUDTimer } from "./elements/hud.js";
 import { setScoreboard, displayScoreboard, updateScoreboard } from "./elements/scoreboard.js";
 import { displayPause, removePause } from "./elements/pause.js";
-import { initiateRunContainer, resetRunContainer, testRunContainer, updateRunContainer } from "./elements/run.js";
 
 const bulletShot = new Audio("./audio/shell_shot.wav");
 bulletShot.volume = 0.1;
@@ -89,14 +88,13 @@ document.addEventListener("DOMContentLoaded", () => {
     arena = document.getElementById("arena");
     startButton = document.getElementById("startGame");
 
+    // TODO Check what we can do with the name to make it easier to read
     nameForm.onclick = (e) => {
-        //console.log("nameForm submitted");
         e.preventDefault();
         playerName = nameInput.value.trim();
         for (let i = 6; i < playerId.length; i++) {
             playerName += playerId[i];
         }
-        // nameForm.style.display = "none";
         ws.send(JSON.stringify({ type: "selectName", name: playerName }));
     };
 
@@ -138,8 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
     */
 });
 
-const lobby = document.getElementById("lobby"); // TODO: moved to menu.js
-
 ws.onopen = () => {
     console.log("WebSocket connection established");
 };
@@ -159,18 +155,11 @@ ws.onmessage = (event) => {
             setTimeout(() => {
                 window.location.reload();
             }, 10000); // 10,000 milliseconds = 10 seconds
-
-            // save score
-            // switch screen
-            // kick everybody to the lobby.
         }
-        // activePlayers = data.activePlayers;
-        // initiateRunContainer(activePlayers);
     }
 
     if (data.type === "assignPlayerId") {
         playerId = data.playerId;
-        //console.log("Assigned id:", playerId);
     }
 
     // if (data.type === "updateHp") {
@@ -184,7 +173,6 @@ ws.onmessage = (event) => {
     // }
 
     if (data.type === "move") {
-        //console.log(data.playerId, "move", data.direction);
         movePlayer(data.playerId, data.direction, data.rotation, data.x, data.y);
     }
 
@@ -199,7 +187,7 @@ ws.onmessage = (event) => {
         bullets.length = 0;
         setGameStatus("pause");
         console.log("pause timer");
-        ws.send(JSON.stringify({ type: "timer", status: "pause" })); // Sends Pause timer to BE
+        ws.send(JSON.stringify({ type: "timer", status: "pause" }));
         Object.keys(keys).forEach((key) => {
             keys[key] = false;
         });
@@ -209,7 +197,7 @@ ws.onmessage = (event) => {
     if (data.type === "resumeGame") {
         setGameStatus("game");
         console.log("resume timer");
-        ws.send(JSON.stringify({ type: "timer", status: "resume" })); // Sends Resume timer to BE
+        ws.send(JSON.stringify({ type: "timer", status: "resume" })); 
         removePause(gamePaused);
     }
 
@@ -224,16 +212,9 @@ ws.onmessage = (event) => {
             let quitPlayer = document.getElementById(data.quittingPlayerId);
             console.log(quitPlayer);
             quitPlayer.remove();
-            delete players[playerId]; // Remove from the players object
+            delete players[playerId]; 
             playersAlive--;
             if (playersAlive === 1) {
-                // ws.send(
-                //     JSON.stringify({
-                //         type: "sendWinNotifier",
-                //         winner: playerName,
-                //         winnerScore: score,
-                //     })
-                // );
                 setGameStatus("over");
                 displayGame();
                 ws.send(JSON.stringify({ type: "timer", status: "stop" }));
@@ -270,7 +251,6 @@ ws.onmessage = (event) => {
         } else {
             startButton.style.display = "none";
         }
-        // TODO: create more divs to hold different parts of the message.
         if (isLeader) {
             if (playerName) {
                 waitingMessage.textContent = `Your name is set as ${playerName}  and you are the lobby leader.`;
@@ -290,11 +270,9 @@ ws.onmessage = (event) => {
     }
 
     if (data.type === "gameStart") {
-        //console.log("GAME START!!!");
         setGameStatus("game");
         if (gameRunning) {
             setScoreboard(playerNameList);
-            testRunContainer();
             hideMenu();
             displayGame();
             displayHUD();
@@ -350,10 +328,9 @@ ws.onmessage = (event) => {
 
                 arena = document.getElementById("arena");
                 if (arena) {
-                    //console.log("Arena exists");
                     arena.appendChild(img);
                 } else {
-                    //console.log("Arena does not exist");
+                    console.log("Arena does not exist");
                 }
 
                 arena.appendChild(img);
@@ -366,14 +343,12 @@ ws.onmessage = (event) => {
 
         playerElements.forEach((player) => {
             player.dataset.health = 100;
-            //TODO reset player health on the backend.
         });
 
         gameLoop();
     }
 
     if (data.type === "nextRound") {
-        //TODO: implement starting the next round
         for (let bullet of bullets) {
             bullet.element.remove();
         }
@@ -402,15 +377,11 @@ ws.onclose = () => {
     ws.send(JSON.stringify({ type: "timer", status: "stop" }));
 };
 
-// GAME LOOP
 function gameLoop() {
     if (isRoundOver) {
-        //console.log("Round is over!");
         startNextRound();
-        // resetRunContainer();
     } else {
         updateHUDTimer(time);
-        // checkRemainingTime(time);
         updateLocalPlayer();
         updateBullets();
         requestAnimationFrame(gameLoop);
@@ -418,10 +389,8 @@ function gameLoop() {
 }
 
 function startNextRound() {
-    //TODO: add logic to prepare next round
     document.querySelectorAll("#arena image.player").forEach((player) => player.remove());
     health = 100;
-    // score = 0;
     updateHUD(score, health, time, playerName);
 
     const playerData = [
@@ -464,10 +433,10 @@ function startNextRound() {
 
             arena = document.getElementById("arena");
             if (arena) {
-                //console.log("Arena exists");
+
                 arena.appendChild(img);
             } else {
-                //console.log("Arena does not exist");
+                console.log("Arena does not exist");
             }
             arena.appendChild(img);
         }
@@ -543,7 +512,6 @@ function isColliding(x, y, width, height) {
 }
 
 function checkRectCollision(x1, y1, width1, height1, obstacle) {
-    //console.log("checking obstacle:", obstacle, "\n", "x1:", x1, "y1:", y1, "width1:", width1, "height1", height1);
 
     const obstacleX = parseFloat(obstacle.getAttribute("x"));
     const obstacleY = parseFloat(obstacle.getAttribute("y"));
@@ -580,6 +548,7 @@ function checkRectCollision(x1, y1, width1, height1, obstacle) {
         "obstacle bottom:",
         obstacleBottom
     );*/
+
     // Check for intersection between the bullet and the obstacle
     const isColliding = !(
         objectRight < obstacleLeft ||
@@ -773,7 +742,7 @@ function shootBullet(pId, direction) {
         element: bullet,
         x: bulletX,
         y: bulletY,
-        shooter: shooter, // saves the shooter of the bullet
+        shooter: shooter, 
         vx: velocityX,
         vy: velocityY,
     });
@@ -836,7 +805,6 @@ function checkBulletCollision(bullet) {
         if (player) {
             const bulletBox = bullet.element.getBBox();
             const playerBox = player.getBBox();
-            //console.log(bulletBox, "\n", playerBox);
             if (
                 bulletBox.x < playerBox.x + playerBox.width &&
                 bulletBox.x + bulletBox.width > playerBox.x &&
@@ -856,7 +824,6 @@ function checkBulletCollision(bullet) {
 function handlePlayerHit(player, bullet) {
     console.log("Player hit:", player.id, "bullet:", bullet.shooter);
     // Decrease health
-
     if (player.id === playerId) {
         health -= 20;
         updateHUD(score, health, time, playerName);
@@ -869,9 +836,7 @@ function handlePlayerHit(player, bullet) {
     }
 
     player.dataset.health -= 20;
-    //console.log(`${player.id} health: ${player.dataset.health}`);
 
-    // Update the player's `data-health` attribute (optional for debugging)
     player.setAttribute("data-health", player.dataset.health);
 
     // Apply glow effect
@@ -888,56 +853,32 @@ function handlePlayerHit(player, bullet) {
     const explosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
 
     if (player.dataset.health <= 0) {
-        //console.log(`${player.id} is eliminated!`);
-        // Use "Explosion53.gif" for destroyed tanks
         console.log("From death. Player hit:", player.id, "bullet:", bullet.shooter);
-        // ws.send(JSON.stringify({type: "updateScore",playerId: bullet.shooter,score: 100,}));
 
         const tankExplosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
         tankExplosion.setAttribute("href", "./images/Explosion53.gif");
         tankExplosion.setAttribute("width", "100"); // Adjust size as needed
         tankExplosion.setAttribute("height", "100");
-        //tankExplosion.play();
-
-        // Center explosion on tank
+    // Center explosion on tank
         const tankX = player.x.baseVal.value - 25; // Offset to center
         const tankY = player.y.baseVal.value - 25; // Offset to center
 
         tankExplosion.setAttribute("x", tankX);
         tankExplosion.setAttribute("y", tankY);
-
         // Add explosion to the arena
         document.getElementById("arena").appendChild(tankExplosion);
-        // Remove tank after a short delay for a smoother explosion effect
         setTimeout(() => {
-            player.remove(); //TODO: need to give somebody points for the kill.
+            player.remove(); 
             delete players[player.id]; // Remove from the players object
-            // TODO  Is this logic correct?  it will not give points on every kill?
-
             playersAlive--;
             if (playersAlive === 1) {
                 if (playerId != player.id) {
                     score += 50;
-                    //TODO: Remove this
-                    // updateHUD(score, health, time, playerName);
-                    // This is the new score by HS  It does not work
-                    // ws.send(
-                    //     JSON.stringify({
-                    //         type: "updateScore",
-                    //         playerId: bullet.shooter,
-                    //         score: 100,
-                    //     })
-                    // );
-                    // This is the old score by KH
                     ws.send(JSON.stringify({ type: "updateScoreboard", playerName, score }));
-
-                    //TODO: respawn player
-                    console.log("Respawn player:", player.id);
                     ws.send(JSON.stringify({ type: "startNextRound" }));
                 }
             }
         }, 100);
-
         // Remove explosion after 800ms for a more dramatic effect
         setTimeout(() => {
             tankExplosion.remove();
@@ -962,7 +903,6 @@ function handlePlayerHit(player, bullet) {
         ws.send(JSON.stringify({ type: "updateHp", playerId: player.id, hp: 20 })); // reduce health by 20
         // Add explosion to the arena
         document.getElementById("arena").appendChild(explosion);
-
         // Remove explosion after 500ms
         setTimeout(() => {
             explosion.remove();
@@ -977,37 +917,29 @@ function updateBullets() {
         let newX = bullet.x;
         bullet.y += bullet.vy;
         let newY = bullet.y;
-
         // **Check if the bullet collides with an obstacle**
         if (isColliding(newX, newY, 10, 14)) {
             // Bullet size is 10x14
             //console.log("Bullet hit an obstacle!");
-
             // **Remove the bullet**
             bullet.element.remove();
             bullets.splice(i, 1); // Remove bullet
-
             // **Play explosion sound**
             bulletExplosion.currentTime = 0;
             bulletExplosion.play().catch((error) => console.log("Audio playback error:", error));
-
             return;
         }
-
         bullet.element.setAttribute("x", bullet.x);
         bullet.element.setAttribute("y", bullet.y);
-
         // Keep bullet rotated while moving
         const angle = parseFloat(bullet.element.getAttribute("transform").match(/rotate\((-?\d+)/)[1]);
         bullet.element.setAttribute("transform", `rotate(${angle} ${bullet.x + 5} ${bullet.y + 7})`);
-
         // Check if bullet hits a player
         if (checkBulletCollision(bullet)) {
             bullet.element.remove();
             bullets.splice(i, 1); // Remove bullet
             continue;
         }
-
         // Remove bullet if out of bounds
         if (bullet.x < 0 || bullet.x > 1344 || bullet.y < 0 || bullet.y > 768) {
             bullet.element.remove();
@@ -1019,8 +951,6 @@ function updateBullets() {
 function handlePauseAction(action) {
     if (action === "resume") {
         ws.send(JSON.stringify({ type: "sendResumeGame" }));
-
-        console.log("resume timer");
         ws.send(JSON.stringify({ type: "timer", status: "resume" }));
     }
 
@@ -1032,7 +962,6 @@ function handlePauseAction(action) {
                 resetBy: playerName,
             })
         );
-        console.log("stop timer");
         ws.send(JSON.stringify({ type: "timer", status: "stop" }));
     }
 
@@ -1044,12 +973,6 @@ function handlePauseAction(action) {
                 quittingPlayerId: playerId,
             })
         );
-        console.log("stop timer");
         ws.send(JSON.stringify({ type: "timer", status: "stop" }));
     }
 }
-
-// function gameOver() {
-//   console.log("Game Over");
-//     window.location.reload()
-// }

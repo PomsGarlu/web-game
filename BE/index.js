@@ -45,7 +45,7 @@ server.on("connection", (ws) => {
             ws.close();
             return;
         }
-    } // creates a player for each connection
+    } 
 
     playerCounter++;
     const playerId = `player${playerCounter}`;
@@ -68,7 +68,7 @@ server.on("connection", (ws) => {
     };
 
     /**
-     * activePlayers holds a list of players that are currently connected to the game.
+     * activePlayers holds a list of players that are currently connected to the game NOT USED IN THIS VERSION
      *
      * @type {Player}
      *
@@ -92,7 +92,6 @@ server.on("connection", (ws) => {
         )
     );
 
-    // console.log("Active Player added", activePlayers[playerCounter - 1]); // shows the added player
     ws.send(JSON.stringify({ type: "assignPlayerId", playerId }));
     broadcastLobby();
 
@@ -113,7 +112,7 @@ server.on("connection", (ws) => {
             });
             broadcastLobby();
         }
-        //TODO: send in the health  from the front end not the delta
+
         if (data.type === "updateHp") {
             console.log("HP Update:", data);
             activePlayers.forEach((player) => {
@@ -121,8 +120,6 @@ server.on("connection", (ws) => {
                     player.health = data.hp; // set new health
                     console.log("Player", player);
                     console.log("Player reduction", player.hp);
-                    // console.log("Player stats", player);
-                    // broadcast({ type: "updateHp", playerId: data.playerId, hp: data.hp }); // This is probably not needed
                 }
             });
         }
@@ -137,7 +134,7 @@ server.on("connection", (ws) => {
         }
 
         if (data.type === "startNextRound") {
-            console.log("Next Round");
+            // console.log("Next Round");
             activePlayers = []; // clear the active players
             let playersWithoutWs = getPlayersWithoutWs();
             console.log("Players Without WS", playersWithoutWs);
@@ -151,12 +148,12 @@ server.on("connection", (ws) => {
 
         if (data.type === "sendPauseGame") {
             broadcast({ type: "pauseGame", whoPaused: data.whoPaused });
-            console.log("Game Paused");
+            // console.log("Game Paused");
         }
 
         if (data.type === "sendResumeGame") {
             broadcast({ type: "resumeGame" });
-            console.log("Game Resumed");
+            // console.log("Game Resumed");
         }
 
         if (data.type === "sendQuitNotifier") {
@@ -165,7 +162,7 @@ server.on("connection", (ws) => {
                 quittingPlayer: data.quittingPlayer,
                 quittingPlayerId: data.quittingPlayerId,
             });
-            console.log("Player Quit");
+            // console.log("Player Quit");
         }
 
         if (data.type === "sendWinNotifier") {
@@ -174,7 +171,7 @@ server.on("connection", (ws) => {
                 winner: data.winner,
                 winnerScore: data.winnerScore,
             });
-            console.log("Game Over");
+            // console.log("Game Over");
         }
 
         if (data.type === "updateScoreboard") {
@@ -183,8 +180,7 @@ server.on("connection", (ws) => {
                 playerName: data.playerName,
                 playerScore: data.score,
             });
-            //  Add updated player score to the player object
-            console.log("Scoreboard Updated", data.playerName, "Score", data.score);
+            // console.log("Scoreboard Updated", data.playerName, "Score", data.score);
         }
 
         if (data.type === "move") {
@@ -214,6 +210,7 @@ server.on("connection", (ws) => {
 
         if (data.type === "startGame") {
             gameRunning = true;
+            playerCounter = 0; // reset the player counter so you always start from player1
             console.log("Game Started");
             let playersWithoutWs = getPlayersWithoutWs();
             console.log("Players Without WS", playersWithoutWs);
@@ -222,18 +219,14 @@ server.on("connection", (ws) => {
         }
     });
 
-    // ws.on("login", (data) => {});
-
     ws.on("close", () => {
         console.log("Player Disconnected");
         delete players[playerId];
-
         broadcastLobby();
     });
 });
 
 // FUNCTIONS
-
 function broadcast(data) {
     if (!data.type === "time") {
         console.log("data sent to the front", data);

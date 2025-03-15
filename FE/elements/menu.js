@@ -11,15 +11,8 @@ const content = `
   <!-- SVG Arena -->
 </div>`;
 
-
-// Waiting message needs to be split into two messages
-
-
 export function displayMenu() {
     var menu = document.getElementById("menu");
-    //   console.log("We are creating the menu");
-    //   console.log("In Menu: " + inMenu);
-    //   console.log (inMenu);
     menu.innerHTML = content;
 }
 

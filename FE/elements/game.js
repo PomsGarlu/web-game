@@ -1,8 +1,6 @@
-// move the front end game elements to display here.
-
-export let gameRunning = false; // game loop
-export let gamePaused = false; // pause Menu
-export let gameOver = false; // score screen
+export let gameRunning = false; 
+export let gamePaused = false; 
+export let gameOver = false; 
 
 export function displayGame() {
     if (gameOver) {
@@ -27,17 +25,8 @@ Bullet Container (For dynamically created bullets)
 </svg>
     `;
 }
-/**
- *  what do we put in here?
- * @param {} finalScores
- *
- * player.rank
- * player.name
- * player.score
- *
- */
+
 export function displayGameScore() {
-    //TODO: create a  getScores() function that returns the scores
     let scoreboard = document.getElementById("scoreboard");
     let game = document.getElementById("game");
     let hud = document.getElementById("hud");
