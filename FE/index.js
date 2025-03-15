@@ -150,9 +150,10 @@ ws.onmessage = (event) => {
 
     // Handle time input from the backend.
     if (data.type === "time") {
-        time = data.time;
-        activePlayers = data.activePlayers;
-        initiateRunContainer(activePlayers);
+        time = data.remainingTime;
+        console.log("Time:", remainingTime);
+        // activePlayers = data.activePlayers;
+        // initiateRunContainer(activePlayers);
     }
 
     if (data.type === "assignPlayerId") {
@@ -387,9 +388,10 @@ ws.onclose = () => {
 function gameLoop() {
     if (isRoundOver) {
         startNextRound();
-        resetRunContainer();
+        // resetRunContainer();
     } else {
         updateHUDTimer(time);
+        // checkRemainingTime(time);
         updateLocalPlayer();
         updateBullets();
         requestAnimationFrame(gameLoop);
@@ -862,6 +864,9 @@ function handlePlayerHit(player, bullet) {
     if (player.dataset.health <= 0) {
         //console.log(`${player.id} is eliminated!`);
         // Use "Explosion53.gif" for destroyed tanks
+        console.log("From death. Player hit:", player.id, "bullet:", bullet.shooter);
+        // ws.send(JSON.stringify({type: "updateScore",playerId: bullet.shooter,score: 100,}));
+
         const tankExplosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
         tankExplosion.setAttribute("href", "./images/Explosion53.gif");
         tankExplosion.setAttribute("width", "100"); // Adjust size as needed
@@ -877,25 +882,26 @@ function handlePlayerHit(player, bullet) {
 
         // Add explosion to the arena
         document.getElementById("arena").appendChild(tankExplosion);
-
         // Remove tank after a short delay for a smoother explosion effect
         setTimeout(() => {
             player.remove(); //TODO: need to give somebody points for the kill.
             delete players[player.id]; // Remove from the players object
+            // TODO  Is this logic correct?  it will not give points on every kill?
+
             playersAlive--;
             if (playersAlive === 1) {
                 if (playerId != player.id) {
                     score++;
-                    updateHUD(score, health, time, playerName);
-                    // This is the new score by HS
-                    ws.send(
-                        JSON.stringify({
-                            type: "updateScore",
-                            playerId: bullet.shooter,
-                            score: 100,
-                        })
-                    );
-                    ws.send(JSON.stringify({ type: "updateHp", playerId: player.id, hp: 0 })); // when you die set health to 0
+                    //TODO: Remove this
+                    // updateHUD(score, health, time, playerName);
+                    // This is the new score by HS  It does not work 
+                    // ws.send(
+                    //     JSON.stringify({
+                    //         type: "updateScore",
+                    //         playerId: bullet.shooter,
+                    //         score: 100,
+                    //     })
+                    // );
                     // This is the old score by KH
                     ws.send(JSON.stringify({ type: "updateScoreboard", playerName, score }));
 

@@ -39,10 +39,16 @@ DONE: When a player pauses, restarts or quits, their name is displayed to other 
 
 
 TODO:/DONE The game displays the pause menu with options to continue, restart or quit. (the menu kinda works implement end game) ADD END GAME
+
 TODO: WIP  The player ahs implemented a scoring/lives system.
+
 TODO: WIP  All players can see the score/lives of all opponents.
+
 TODO: WIP  The score/lives updates in real time 
+
 TODO: At the end of the game, the winner is displayed (win condition last person in the lobby or person with highest score)
+
+
 TODO: A timer counts up or down. (implement end game on set time)
 
 
