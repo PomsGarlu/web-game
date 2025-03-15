@@ -133,6 +133,14 @@ server.on("connection", (ws) => {
             });
         }
 
+        if (data.type === "sendUpdateHud") {
+            broadcast({
+                type: "updateHud",
+                playerId: data.playerId,
+                healthLost: data.healthLost,
+            });
+        }
+
         if (data.type === "startNextRound") {
             // console.log("Next Round");
             activePlayers = []; // clear the active players

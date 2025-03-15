@@ -38,7 +38,6 @@ function displayObstacles() {
         image.setAttribute("href", obstacle.image);
         image.setAttribute("fill", "gray"); // Change color as needed
         image.classList.add("obstacle"); // Assign class for easy access later
-
         arena.appendChild(image);
     });
 }
@@ -192,6 +191,19 @@ ws.onmessage = (event) => {
 
     if (data.type === "globalUpdateScoreboard") {
         updateScoreboard(data.playerName, data.playerScore);
+    }
+
+    if (data.type === "updateHud") {
+        if (playerId === data.playerId) {
+            health -= data.healthLost;
+            console.log("hud update from another client");
+            updateHUD(score, health, time, playerName);
+            let player = document.getElementById(playerId);
+            player.style.filter = "brightness(2)";
+            setTimeout(() => {
+                player.style.filter = "none";
+            }, 500);
+        }
     }
 
     if (data.type === "pauseGame") {
@@ -460,7 +472,7 @@ function startNextRound() {
     });
 
     isRoundOver = false;
-    requestAnimationFrame(gameLoop);
+    //requestAnimationFrame(gameLoop);
 }
 
 const keys = {
@@ -839,90 +851,91 @@ function checkBulletCollision(bullet) {
 function handlePlayerHit(player, bullet) {
     console.log("Player hit:", player.id, "bullet:", bullet.shooter);
     // Decrease health
-    if (player.id === playerId) {
-        health -= 20;
-        updateHUD(score, health, time, playerName);
-    }
+    // if (player.id === playerId) {
+    //     health -= 20;
+    //     updateHUD(score, health, time, playerName);
+    // }
 
     if (bullet.shooter === playerId) {
+        player.dataset.health -= 20;
+        player.setAttribute("data-health", player.dataset.health);
+
+        // Apply glow effect
+        player.style.filter = "brightness(2)";
+        setTimeout(() => {
+            player.style.filter = "none";
+        }, 500);
         score += 10;
         updateHUD(score, health, time, playerName);
+        ws.send(JSON.stringify({ type: "sendUpdateHud", playerId: player.id, healthLost: 20 }));
+
         ws.send(JSON.stringify({ type: "updateScoreboard", playerName, score }));
+
+        // Determine explosion position based on bullet impact
+        const explosionX = bullet?.x ? bullet.x - 13 : player.x.baseVal.value;
+        const explosionY = bullet?.y ? bullet.y - 13 : player.y.baseVal.value;
+
+        const explosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
+
+        if (player.dataset.health <= 0) {
+            console.log("From death. Player hit:", player.id, "bullet:", bullet.shooter);
+
+            const tankExplosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
+            tankExplosion.setAttribute("href", "./images/Explosion53.gif");
+            tankExplosion.setAttribute("width", "100"); // Adjust size as needed
+            tankExplosion.setAttribute("height", "100");
+            // Center explosion on tank
+            const tankX = player.x.baseVal.value - 25; // Offset to center
+            const tankY = player.y.baseVal.value - 25; // Offset to center
+
+            tankExplosion.setAttribute("x", tankX);
+            tankExplosion.setAttribute("y", tankY);
+            // Add explosion to the arena
+            document.getElementById("arena").appendChild(tankExplosion);
+            setTimeout(() => {
+                player.remove();
+                delete players[player.id]; // Remove from the players object
+                playersAlive--;
+                if (playersAlive === 1) {
+                    if (playerId != player.id) {
+                        score += 50;
+                        ws.send(JSON.stringify({ type: "updateScoreboard", playerName, score }));
+                        ws.send(JSON.stringify({ type: "startNextRound" }));
+                    }
+                }
+            }, 100);
+            // Remove explosion after 800ms for a more dramatic effect
+            setTimeout(() => {
+                tankExplosion.remove();
+            }, 800);
+        } else {
+            // Use normal explosion for non-lethal hits (Bullet impact)
+            explosion.setAttribute("href", "./images/Explosion52.gif");
+            explosion.setAttribute("width", "52");
+            explosion.setAttribute("height", "52");
+            explosion.setAttribute("x", explosionX);
+            explosion.setAttribute("y", explosionY);
+            bulletExplosion.play();
+            // should send the player id of the shooter to the and give them 10 points.
+            ws.send(
+                JSON.stringify({
+                    type: "updateScore",
+                    playerId: bullet.shooter,
+                    score: 10,
+                })
+            );
+
+            ws.send(JSON.stringify({ type: "updateHp", playerId: player.id, hp: 20 })); // reduce health by 20
+            // Add explosion to the arena
+            document.getElementById("arena").appendChild(explosion);
+            // Remove explosion after 500ms
+            setTimeout(() => {
+                explosion.remove();
+            }, 500);
+        }
     }
-
-    player.dataset.health -= 20;
-
-    player.setAttribute("data-health", player.dataset.health);
-
-    // Apply glow effect
-    player.style.filter = "brightness(2)";
-    setTimeout(() => {
-        player.style.filter = "none";
-    }, 500);
-
-    // Determine explosion position based on bullet impact
-    const explosionX = bullet?.x ? bullet.x - 13 : player.x.baseVal.value;
-    const explosionY = bullet?.y ? bullet.y - 13 : player.y.baseVal.value;
 
     // Create explosion image
-    const explosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
-
-    if (player.dataset.health <= 0) {
-        console.log("From death. Player hit:", player.id, "bullet:", bullet.shooter);
-
-        const tankExplosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
-        tankExplosion.setAttribute("href", "./images/Explosion53.gif");
-        tankExplosion.setAttribute("width", "100"); // Adjust size as needed
-        tankExplosion.setAttribute("height", "100");
-        // Center explosion on tank
-        const tankX = player.x.baseVal.value - 25; // Offset to center
-        const tankY = player.y.baseVal.value - 25; // Offset to center
-
-        tankExplosion.setAttribute("x", tankX);
-        tankExplosion.setAttribute("y", tankY);
-        // Add explosion to the arena
-        document.getElementById("arena").appendChild(tankExplosion);
-        setTimeout(() => {
-            player.remove();
-            delete players[player.id]; // Remove from the players object
-            playersAlive--;
-            if (playersAlive === 1) {
-                if (playerId != player.id) {
-                    score += 50;
-                    ws.send(JSON.stringify({ type: "updateScoreboard", playerName, score }));
-                    ws.send(JSON.stringify({ type: "startNextRound" }));
-                }
-            }
-        }, 100);
-        // Remove explosion after 800ms for a more dramatic effect
-        setTimeout(() => {
-            tankExplosion.remove();
-        }, 800);
-    } else {
-        // Use normal explosion for non-lethal hits (Bullet impact)
-        explosion.setAttribute("href", "./images/Explosion52.gif");
-        explosion.setAttribute("width", "52");
-        explosion.setAttribute("height", "52");
-        explosion.setAttribute("x", explosionX);
-        explosion.setAttribute("y", explosionY);
-        bulletExplosion.play();
-        // should send the player id of the shooter to the and give them 10 points.
-        ws.send(
-            JSON.stringify({
-                type: "updateScore",
-                playerId: bullet.shooter,
-                score: 10,
-            })
-        );
-
-        ws.send(JSON.stringify({ type: "updateHp", playerId: player.id, hp: 20 })); // reduce health by 20
-        // Add explosion to the arena
-        document.getElementById("arena").appendChild(explosion);
-        // Remove explosion after 500ms
-        setTimeout(() => {
-            explosion.remove();
-        }, 500);
-    }
 }
 
 function updateBullets() {
