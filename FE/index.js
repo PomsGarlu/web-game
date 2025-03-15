@@ -85,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const nameForm = document.getElementById("nameForm");
     const nameInput = document.getElementById("nameInput");
     const waitingMessage = document.getElementById("waitingMessage");
+    const playerNameContainer = document.getElementById("playerNameContainer");
     arena = document.getElementById("arena");
     startButton = document.getElementById("startGame");
 
@@ -253,14 +254,16 @@ ws.onmessage = (event) => {
         }
         if (isLeader) {
             if (playerName) {
-                waitingMessage.textContent = `Your name is set as ${playerName}  and you are the lobby leader.`;
+                playerNameContainer.textContent = `Your name is ${playerName} .`;
+                waitingMessage.textContent = `You are the lobby leader.`;
                 updateHUD(null, 100, null, playerName);
             } else {
                 waitingMessage.textContent = `You are the lobby leader. Please set your name!`;
             }
         } else {
             if (playerName) {
-                waitingMessage.textContent = `Your name is set as ${playerName} . Waiting for the lobby leader to start the game.`;
+                playerNameContainer.textContent = `Your name is ${playerName} .`;
+                waitingMessage.textContent = `Waiting for the lobby leader to start the game.`;
                 updateHUD(null, 100, null, playerName);
             } else {
                 waitingMessage.textContent = `Please set your name!`;

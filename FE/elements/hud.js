@@ -40,10 +40,6 @@ export function updateHUD(hudScore, hudHealth, hudTimer, hudName) {
     }
 }
 
-function getHUDUpdate() {
-    return HUDcontent;
-}
-
 export function updateHUDTimer(hudTimer) {
     var timer = document.getElementById("time");
     if (timer) {

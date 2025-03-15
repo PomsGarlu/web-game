@@ -27,7 +27,7 @@ function pauseTimer() {
 
 function resumeTimer() {
 
-  startTime = getTimeNow(); // sa
+  startTime = getTimeNow();
   pauseStartTime = 0;
 }
 
