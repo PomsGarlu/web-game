@@ -156,6 +156,10 @@ ws.onmessage = (event) => {
             setGameStatus("over");
             displayGame();
             ws.send(JSON.stringify({ type: "timer", status: "stop" }));
+            setTimeout(() => {
+                window.location.reload();
+            }, 10000); // 10,000 milliseconds = 10 seconds
+
             // save score
             // switch screen
             // kick everybody to the lobby.
