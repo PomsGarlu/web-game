@@ -236,8 +236,10 @@ ws.onmessage = (event) => {
                 // );
                 setGameStatus("over");
                 displayGame();
-                console.log("stop timer");
                 ws.send(JSON.stringify({ type: "timer", status: "stop" }));
+                setTimeout(() => {
+                    window.location.reload();
+                }, 10000); // 10,000 milliseconds = 10 seconds
             }
         }
     }
