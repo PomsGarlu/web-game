@@ -810,43 +810,41 @@ function shootBullet(pId, direction) {
 }
 
 function checkBulletCollision(bullet) {
-    for (const player of Object.values(playerElements)) {
-        if (player) {
-            const bulletBox = bullet.element.getBBox();
-            const playerBox = player.getBBox();
-            //console.log(bulletBox, "\n", playerBox);
-            if (
-                bulletBox.x < playerBox.x + playerBox.width &&
-                bulletBox.x + bulletBox.width > playerBox.x &&
-                bulletBox.y < playerBox.y + playerBox.height &&
-                bulletBox.y + bulletBox.height > playerBox.y
-            ) {
-                console.log(`Bullet hit ${player.id}!`);
-                handlePlayerHit(player, bullet); // Pass bullet position to explosion
-                return true; // Collision detected
-            }
-        }
+  for (const player of Object.values(playerElements)) {
+    if (player) {
+      const bulletBox = bullet.element.getBBox();
+      const playerBox = player.getBBox();
+      //console.log(bulletBox, "\n", playerBox);
+      if (
+        bulletBox.x < playerBox.x + playerBox.width &&
+        bulletBox.x + bulletBox.width > playerBox.x &&
+        bulletBox.y < playerBox.y + playerBox.height &&
+        bulletBox.y + bulletBox.height > playerBox.y
+      ) {
+        console.log(`Bullet hit ${player.id}!`);
+        ws.send
+        handlePlayerHit(player, bullet); // Pass bullet position to explosion
+        return true; // Collision detected
+      }
     }
-    return false;
+  }
+  return false;
 }
 
 function handlePlayerHit(player, bullet) {
     console.log("Player hit:", player.id, "bullet:", bullet.shooter);
     // Decrease health
 
-    if (player.id === playerId) {
-        health -= 20;
-        updateHUD(score, health, time, playerName);
-        ws.send(JSON.stringify({ type: "updateHp", playerId: player.id, hp: health }));
-    }
+  if (player.id === playerId) {
+    health -= 20;
+    updateHUD(score, health, time, playerName);
+  }
 
     player.dataset.health -= 20;
     //console.log(`${player.id} health: ${player.dataset.health}`);
 
-    // Update the player's `data-health` attribute (optional for debugging)
-    player.setAttribute("data-health", player.dataset.health);
-
-    ws.send(JSON.stringify({ type: "updateHp", playerId: player.id, hp: 100 }));
+  // Update the player's `data-health` attribute (optional for debugging)
+  player.setAttribute("data-health", player.dataset.health);
 
     // Apply glow effect
     player.style.filter = "brightness(2)";

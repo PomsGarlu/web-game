@@ -1,7 +1,7 @@
  1 - Up left, down left, down right. directions do not fire bullets when moving at angle
  2 - There will always be a number after your name. if you select your name 
- 3 - the quit only kicks one person out.
- 4 - if  quit the game stalls for other players  
+ 3 - the quit only kicks one person out. ?
+ 4 - if  quit the game stalls for other players  ?
  5 - players not re spawning 
- 6 - timer resets on kill ? 
- 7- There is still the cursor moving in the hud when the game is ongoing
+ 6 - timer resets on kill - Fixed
+ 7 - There is still the cursor moving in the hud when the game is ongoing
