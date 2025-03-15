@@ -2,29 +2,29 @@
 # Setup 
 
 The program consists of two parts the backend and the the front end.
-The backend is responsible for syncronizing data between players and keeping track of the
+The backend is responsible for synchronizing data between players and keeping track of the
 
 ## Backend setup
 
-- navigate to the folder named BE.
-- run: $ npm install
+1) navigate to the folder named BE.
+2) run: $ npm install
 
 ## Front end setup
 
-- navigate to the folder named FE.
-- run: $ npm install
+1) navigate to the folder named FE.
+2) run: $ npm install
 
 ## Launch
 
 To start the backend server
 
-- navigate to the folder named BE.
- run $node index.js in the terminal,
+ 1) navigate to the folder named BE.
+ 2) run $node index.js in the terminal,
 
 
 To start the frontend server
-- navigate to the folder named FE.
-- run $node server.js in the FE folder
+ 1) navigate to the folder named FE.
+ 2) run $node server.js in the FE folder
 
 
 the game will be running on localhost:/3000/
