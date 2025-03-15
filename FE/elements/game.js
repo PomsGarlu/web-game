@@ -5,10 +5,11 @@ export let gamePaused = false; // pause Menu
 export let gameOver = false; // score screen
 
 export function displayGame() {
-    if(gameOver){
+    if (gameOver) {
+        console.log("GAME HAS ENDED!");
         displayGameScore();
-        return 
-    } 
+        return;
+    }
     var game = document.getElementById("game");
     game.style.display = "flex";
 
@@ -28,36 +29,22 @@ Bullet Container (For dynamically created bullets)
 }
 /**
  *  what do we put in here?
- * @param {} finalScores 
- * 
+ * @param {} finalScores
+ *
  * player.rank
  * player.name
  * player.score
- * 
+ *
  */
 export function displayGameScore() {
     //TODO: create a  getScores() function that returns the scores
-    let finalScores = [
-        { name: "Player 1", score: 1000 },
-        { name: "Player 2", score: 500 },
-        { name: "Player 3", score: 250 },
-        { name: "Player 4", score:0},
-    ];
-
-    let content="";
-    var game = document.getElementById("game");
-    finalScores.forEach((score) => {
-        content += `
-        <div class="score">
-            <div class="score-name
-            ">${score.name}</div>
-            <div class="score-value">${score.score}</div>
-        </div>
-        `
-    });
-    // add a time out for quit
+    let scoreboard = document.getElementById("scoreboard");
+    let game = document.getElementById("game");
+    let content = "<h1>The game has ended! These are the final results:</h1>";
+    content += scoreboard.innerHTML;
     game.style.display = "flex";
-    game.innerHTML = content
+    game.innerHTML = content;
+    // add a time out for quit
 }
 
 export function setGameStatus(status) {

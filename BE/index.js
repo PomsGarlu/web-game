@@ -3,14 +3,13 @@ const Player = require("./src/models/player.js");
 const WebSocket = require("ws");
 const port = process.env.PORT || 8080;
 const server = new WebSocket.Server({ port });
-const GAME_TIME = 30;   // number
+const GAME_TIME = 30; // number
 
 let players = {};
 let gameRunning = false; // not used at the moment
 let playerCounter = 0;
 let time = 0;
 let singlePlayer = false;
-
 
 /**
  * @type {Player[]}
@@ -25,12 +24,12 @@ setInterval(() => {
     time = timer.getElapseTime(pausedTimer);
     if (time > -1) {
         remainingTime = GAME_TIME - time;
-        if (remainingTime == 0) { 
-          timer.resetTimer();
-          // Send end game message
+        if (remainingTime == 0) {
+            timer.resetTimer();
+            // Send end game message
         }
         console.log("Time Remaining", remainingTime);
-        broadcast({ type: "time", remainingTime, activePlayers });  // send the time to the front end if -1 meaning the timer is not running, this sends also the active player data we are interested in the health and score
+        broadcast({ type: "time", remainingTime, activePlayers }); // send the time to the front end if -1 meaning the timer is not running, this sends also the active player data we are interested in the health and score
     }
 }, 1000);
 

@@ -152,10 +152,12 @@ ws.onmessage = (event) => {
     if (data.type === "time") {
         time = data.remainingTime;
         if (time === 0) {
-          console.log("Game Over"); 
-          window.location.reload()
-            // save score 
-            // switch screen 
+            console.log("Game Over");
+            setGameStatus("over");
+            displayGame();
+            ws.send(JSON.stringify({ type: "timer", status: "stop" }));
+            // save score
+            // switch screen
             // kick everybody to the lobby.
         }
         // activePlayers = data.activePlayers;
@@ -221,13 +223,15 @@ ws.onmessage = (event) => {
             delete players[playerId]; // Remove from the players object
             playersAlive--;
             if (playersAlive === 1) {
-                ws.send(
-                    JSON.stringify({
-                        type: "sendWinNotifier",
-                        winner: playerName,
-                        winnerScore: score,
-                    })
-                );
+                // ws.send(
+                //     JSON.stringify({
+                //         type: "sendWinNotifier",
+                //         winner: playerName,
+                //         winnerScore: score,
+                //     })
+                // );
+                setGameStatus("over");
+                displayGame();
                 console.log("stop timer");
                 ws.send(JSON.stringify({ type: "timer", status: "stop" }));
             }
@@ -822,43 +826,47 @@ function shootBullet(pId, direction) {
 }
 
 function checkBulletCollision(bullet) {
-  for (const player of Object.values(playerElements)) {
-    if (player) {
-      const bulletBox = bullet.element.getBBox();
-      const playerBox = player.getBBox();
-      //console.log(bulletBox, "\n", playerBox);
-      if (
-        bulletBox.x < playerBox.x + playerBox.width &&
-        bulletBox.x + bulletBox.width > playerBox.x &&
-        bulletBox.y < playerBox.y + playerBox.height &&
-        bulletBox.y + bulletBox.height > playerBox.y
-      ) {
-        console.log(`Bullet hit ${player.id}!`);
-        ws.send
-        handlePlayerHit(player, bullet); // Pass bullet position to explosion
-        return true; // Collision detected
-      }
+    for (const player of Object.values(playerElements)) {
+        if (player) {
+            const bulletBox = bullet.element.getBBox();
+            const playerBox = player.getBBox();
+            //console.log(bulletBox, "\n", playerBox);
+            if (
+                bulletBox.x < playerBox.x + playerBox.width &&
+                bulletBox.x + bulletBox.width > playerBox.x &&
+                bulletBox.y < playerBox.y + playerBox.height &&
+                bulletBox.y + bulletBox.height > playerBox.y
+            ) {
+                console.log(`Bullet hit ${player.id}!`);
+                ws.send;
+                handlePlayerHit(player, bullet); // Pass bullet position to explosion
+                return true; // Collision detected
+            }
+        }
     }
-  }
-  return false;
+    return false;
 }
-
-
 
 function handlePlayerHit(player, bullet) {
     console.log("Player hit:", player.id, "bullet:", bullet.shooter);
     // Decrease health
 
-  if (player.id === playerId) {
-    health -= 20;
-    updateHUD(score, health, time, playerName);
-  }
+    if (player.id === playerId) {
+        health -= 20;
+        updateHUD(score, health, time, playerName);
+    }
+
+    if (bullet.shooter === playerId) {
+        score += 10;
+        updateHUD(score, health, time, playerName);
+        ws.send(JSON.stringify({ type: "updateScoreboard", playerName, score }));
+    }
 
     player.dataset.health -= 20;
     //console.log(`${player.id} health: ${player.dataset.health}`);
 
-  // Update the player's `data-health` attribute (optional for debugging)
-  player.setAttribute("data-health", player.dataset.health);
+    // Update the player's `data-health` attribute (optional for debugging)
+    player.setAttribute("data-health", player.dataset.health);
 
     // Apply glow effect
     player.style.filter = "brightness(2)";
@@ -903,10 +911,10 @@ function handlePlayerHit(player, bullet) {
             playersAlive--;
             if (playersAlive === 1) {
                 if (playerId != player.id) {
-                    score++;
+                    score += 50;
                     //TODO: Remove this
                     // updateHUD(score, health, time, playerName);
-                    // This is the new score by HS  It does not work 
+                    // This is the new score by HS  It does not work
                     // ws.send(
                     //     JSON.stringify({
                     //         type: "updateScore",
@@ -1036,6 +1044,6 @@ function handlePauseAction(action) {
 }
 
 // function gameOver() {
-//   console.log("Game Over"); 
+//   console.log("Game Over");
 //     window.location.reload()
 // }
