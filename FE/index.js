@@ -151,7 +151,13 @@ ws.onmessage = (event) => {
     // Handle time input from the backend.
     if (data.type === "time") {
         time = data.remainingTime;
-        console.log("Time:", remainingTime);
+        if (time === 0) {
+          console.log("Game Over"); 
+          window.location.reload()
+            // save score 
+            // switch screen 
+            // kick everybody to the lobby.
+        }
         // activePlayers = data.activePlayers;
         // initiateRunContainer(activePlayers);
     }
@@ -350,7 +356,9 @@ ws.onmessage = (event) => {
 
         playerElements.forEach((player) => {
             player.dataset.health = 100;
+            //TODO reset player health on the backend.
         });
+
         gameLoop();
     }
 
@@ -387,6 +395,7 @@ ws.onclose = () => {
 // GAME LOOP
 function gameLoop() {
     if (isRoundOver) {
+        //console.log("Round is over!");
         startNextRound();
         // resetRunContainer();
     } else {
@@ -402,6 +411,7 @@ function startNextRound() {
     //TODO: add logic to prepare next round
     document.querySelectorAll("#arena image.player").forEach((player) => player.remove());
     health = 100;
+    // score = 0;
     updateHUD(score, health, time, playerName);
 
     const playerData = [
@@ -833,6 +843,8 @@ function checkBulletCollision(bullet) {
   return false;
 }
 
+
+
 function handlePlayerHit(player, bullet) {
     console.log("Player hit:", player.id, "bullet:", bullet.shooter);
     // Decrease health
@@ -1022,3 +1034,8 @@ function handlePauseAction(action) {
         ws.send(JSON.stringify({ type: "timer", status: "stop" }));
     }
 }
+
+// function gameOver() {
+//   console.log("Game Over"); 
+//     window.location.reload()
+// }

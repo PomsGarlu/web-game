@@ -3,7 +3,7 @@ const Player = require("./src/models/player.js");
 const WebSocket = require("ws");
 const port = process.env.PORT || 8080;
 const server = new WebSocket.Server({ port });
-const GAME_TIME = 200;   // number
+const GAME_TIME = 30;   // number
 
 let players = {};
 let gameRunning = false; // not used at the moment
@@ -26,7 +26,7 @@ setInterval(() => {
     if (time > -1) {
         remainingTime = GAME_TIME - time;
         if (remainingTime == 0) { 
-          timer.stopTimer();
+          timer.resetTimer();
           // Send end game message
         }
         console.log("Time Remaining", remainingTime);

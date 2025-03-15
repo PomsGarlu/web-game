@@ -5,6 +5,10 @@ export let gamePaused = false; // pause Menu
 export let gameOver = false; // score screen
 
 export function displayGame() {
+    if(gameOver){
+        displayGameScore();
+        return 
+    } 
     var game = document.getElementById("game");
     game.style.display = "flex";
 
@@ -21,6 +25,39 @@ Bullet Container (For dynamically created bullets)
 <g id="bullet-container"></g>
 </svg>
     `;
+}
+/**
+ *  what do we put in here?
+ * @param {} finalScores 
+ * 
+ * player.rank
+ * player.name
+ * player.score
+ * 
+ */
+export function displayGameScore() {
+    //TODO: create a  getScores() function that returns the scores
+    let finalScores = [
+        { name: "Player 1", score: 1000 },
+        { name: "Player 2", score: 500 },
+        { name: "Player 3", score: 250 },
+        { name: "Player 4", score:0},
+    ];
+
+    let content="";
+    var game = document.getElementById("game");
+    finalScores.forEach((score) => {
+        content += `
+        <div class="score">
+            <div class="score-name
+            ">${score.name}</div>
+            <div class="score-value">${score.score}</div>
+        </div>
+        `
+    });
+    // add a time out for quit
+    game.style.display = "flex";
+    game.innerHTML = content
 }
 
 export function setGameStatus(status) {
