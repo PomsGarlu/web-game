@@ -203,6 +203,20 @@ ws.onmessage = (event) => {
             setTimeout(() => {
                 player.style.filter = "none";
             }, 500);
+            const explosionX = player.x.baseVal.value;
+            const explosionY = player.y.baseVal.value;
+            const explosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
+            explosion.setAttribute("href", "./images/Explosion52.gif");
+            explosion.setAttribute("width", "52");
+            explosion.setAttribute("height", "52");
+            explosion.setAttribute("x", explosionX);
+            explosion.setAttribute("y", explosionY);
+
+            document.getElementById("arena").appendChild(explosion);
+            // Remove explosion after 500ms
+            setTimeout(() => {
+                explosion.remove();
+            }, 500);
         }
     }
 
@@ -645,7 +659,7 @@ function movePlayer(id, direction, rotation, addX, addY) {
     if (id === playerId) {
         bulletDirection = direction;
     }
-    console.log(`Moving player ${id} ${direction}, X by ${addX}, Y by ${addY}`);
+    //console.log(`Moving player ${id} ${direction}, X by ${addX}, Y by ${addY}`);
     if (player === null) {
         console.log("player not alive, not moving");
         return;
@@ -826,8 +840,8 @@ function handlePlayerHit(player, bullet) {
         ws.send(JSON.stringify({ type: "updateScoreboard", playerName, score }));
 
         // Determine explosion position based on bullet impact
-        const explosionX = bullet?.x ? bullet.x - 13 : player.x.baseVal.value;
-        const explosionY = bullet?.y ? bullet.y - 13 : player.y.baseVal.value;
+        const explosionX = player.x.baseVal.value;
+        const explosionY = player.y.baseVal.value;
 
         const explosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
 
