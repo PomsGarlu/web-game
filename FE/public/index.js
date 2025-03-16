@@ -398,13 +398,33 @@ ws.onerror = (error) => {
     ws.send(JSON.stringify({ type: "timer", status: "stop" }));
 };
 
-function gameLoop() {
-    if (isRoundOver) {
-        startNextRound();
-    } else {
-        updateHUDTimer(time);
-        updateLocalPlayer();
-        updateBullets();
+let lastTime = performance.now();
+const targetFPS = 60;
+const interval = 1000 / targetFPS;
+let frameCount = 0;
+let fps = 0;
+let fpsLastUpdate = performance.now();
+
+function gameLoop(currentTime) {
+    let deltaTime = currentTime - lastTime;
+
+    if (deltaTime >= interval) {
+        lastTime = currentTime - (deltaTime % interval); // Prevents drift
+        if (isRoundOver) {
+            startNextRound();
+        } else {
+            updateHUDTimer(time);
+            updateLocalPlayer(deltaTime);
+            updateBullets(deltaTime);
+        }
+
+        frameCount++;
+        if (currentTime - fpsLastUpdate >= 1000) {
+            fps = frameCount;
+            frameCount = 0;
+            fpsLastUpdate = currentTime;
+            console.log(`FPS: ${fps}`);
+        }
     }
 
     requestAnimationFrame(gameLoop);
@@ -595,26 +615,28 @@ function sendPlayerMove(x, y, direction, rotation) {
     }
 }
 // Get player movement type to be sent to the BE.
-function updateLocalPlayer() {
+function updateLocalPlayer(deltaTime) {
+    const moveSpeed = (C.MOVE_SPEED * deltaTime) / (1000 / 60);
+    const diagonalMoveSpeed = (C.DIAGONAL_MOVE_SPEED * deltaTime) / (1000 / 60);
     // Handle diagonal movement first (since it's the higher-priority check)
     if ((keys.ArrowUp && keys.ArrowLeft) || (keys.w && keys.a)) {
-        sendPlayerMove(-C.DIAGONAL_MOVE_SPEED, -C.DIAGONAL_MOVE_SPEED, "upleft", -45);
+        sendPlayerMove(-diagonalMoveSpeed, -diagonalMoveSpeed, "upleft", -45);
     } else if ((keys.ArrowUp && keys.ArrowRight) || (keys.w && keys.d)) {
-        sendPlayerMove(C.DIAGONAL_MOVE_SPEED, -C.DIAGONAL_MOVE_SPEED, "upright", 45);
+        sendPlayerMove(diagonalMoveSpeed, -diagonalMoveSpeed, "upright", 45);
     } else if ((keys.ArrowDown && keys.ArrowLeft) || (keys.s && keys.a)) {
-        sendPlayerMove(-C.DIAGONAL_MOVE_SPEED, C.DIAGONAL_MOVE_SPEED, "downleft", -135);
+        sendPlayerMove(-diagonalMoveSpeed, diagonalMoveSpeed, "downleft", -135);
     } else if ((keys.ArrowDown && keys.ArrowRight) || (keys.s && keys.d)) {
-        sendPlayerMove(C.DIAGONAL_MOVE_SPEED, C.DIAGONAL_MOVE_SPEED, "downright", 135);
+        sendPlayerMove(diagonalMoveSpeed, diagonalMoveSpeed, "downright", 135);
     }
     // Now handle the regular movement (up, down, left, right, angle)
     else if (keys.ArrowUp || keys.w) {
-        sendPlayerMove(0, -C.MOVE_SPEED, "up", 0);
+        sendPlayerMove(0, -moveSpeed, "up", 0);
     } else if (keys.ArrowDown || keys.s) {
-        sendPlayerMove(0, C.MOVE_SPEED, "down", 180);
+        sendPlayerMove(0, moveSpeed, "down", 180);
     } else if (keys.ArrowLeft || keys.a) {
-        sendPlayerMove(-C.MOVE_SPEED, 0, "left", -90);
+        sendPlayerMove(-moveSpeed, 0, "left", -90);
     } else if (keys.ArrowRight || keys.d) {
-        sendPlayerMove(C.MOVE_SPEED, 0, "right", 90);
+        sendPlayerMove(moveSpeed, 0, "right", 90);
     }
 }
 // Moves the player locally
@@ -644,25 +666,78 @@ function movePlayer(id, direction, rotation, addX, addY) {
     player.setAttribute("transform", `rotate(${rotation} ${newX + C.PLAYER_SIZE_X / 2} ${newY + C.PLAYER_SIZE_Y / 2})`);
 }
 // Send bullet data to the BE
+
 function shootBullet(pId, direction) {
-    if (!direction) {
-        //console.log("Cannot shoot: No bullet direction set!");
-        return;
-    }
+    if (!direction) return;
 
     if (pId === playerId) {
         ws.send(JSON.stringify({ type: "shoot", playerId, direction }));
     }
 
-    // Play the bullet shot sound
-    bulletShot.currentTime = 0; // Reset sound to allow rapid firing
+    bulletShot.currentTime = 0;
     bulletShot.play().catch((error) => console.log("Audio playback error:", error));
 
     const player = document.getElementById(pId);
-
-    // Create bullet to the SVG arena
     const bullet = document.createElementNS("http://www.w3.org/2000/svg", "image");
-    const explosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
+
+    let bulletX = parseFloat(player.getAttribute("x")) + 8;
+    let bulletY = parseFloat(player.getAttribute("y")) - 15;
+    let velocityX = 0,
+        velocityY = 0,
+        angle = 0;
+
+    switch (direction) {
+        case "left":
+            bulletX -= 34;
+            bulletY += 34;
+            angle = -90;
+            velocityX = -C.BULLET_SPEED;
+            break;
+        case "right":
+            bulletX += 34;
+            bulletY += 34;
+            angle = 90;
+            velocityX = C.BULLET_SPEED;
+            break;
+        case "down":
+            bulletX += 0;
+            bulletY += 68;
+            angle = 180;
+            velocityY = C.BULLET_SPEED;
+            break;
+        case "upleft":
+            bulletX += -20;
+            bulletY += 15;
+            angle = -45;
+            velocityX = -C.BULLET_SPEED;
+            velocityY = -C.BULLET_SPEED;
+            break;
+        case "upright":
+            bulletX += 20;
+            bulletY += 15;
+            angle = 45;
+            velocityX = C.BULLET_SPEED;
+            velocityY = -C.BULLET_SPEED;
+            break;
+        case "downleft":
+            bulletX -= 18;
+            bulletY += 52;
+            angle = -135;
+            velocityX = -C.BULLET_SPEED;
+            velocityY = C.BULLET_SPEED;
+            break;
+        case "downright":
+            bulletX += 18;
+            bulletY += 52;
+            angle = 135;
+            velocityX = C.BULLET_SPEED;
+            velocityY = C.BULLET_SPEED;
+            break;
+        case "up":
+        default:
+            velocityY = -C.BULLET_SPEED;
+            break;
+    }
 
     let bulletImage = bulletImg;
 
@@ -690,141 +765,20 @@ function shootBullet(pId, direction) {
     bullet.setAttribute("href", bulletImage);
     bullet.setAttribute("width", "10");
     bullet.setAttribute("height", "14");
-
-    // Get player position
-    let bulletX = parseFloat(player.getAttribute("x")) + 8;
-    let bulletY = parseFloat(player.getAttribute("y")) - 15;
-    let shooter = player.id; // TODO make sure this is saved in the backend
-    let velocityX = 0;
-    let velocityY = 0;
-    let angle = 0; // Default is facing "up"
-
-    // Adjust bullet spawn position & angle based on direction
-    switch (direction) {
-        case "left":
-            bulletX -= 34;
-            bulletY += 34;
-            angle = -90;
-            velocityX = -C.BULLET_SPEED;
-            break;
-        case "right":
-            bulletX += 34;
-            bulletY += 34;
-            angle = 90;
-            velocityX = C.BULLET_SPEED;
-            break;
-        case "down":
-            bulletX += 0;
-            bulletY += 68;
-            angle = 180;
-            velocityY = C.BULLET_SPEED;
-            break;
-        case "upleft":
-            bulletX += -20;
-            bulletY += 15;
-            angle = -45;
-            velocityY = -C.BULLET_SPEED;
-            velocityX = -C.BULLET_SPEED;
-            break;
-        case "upright":
-            bulletX += 20;
-            bulletY += 15;
-            angle = 45;
-            velocityY = -C.BULLET_SPEED;
-            velocityX = C.BULLET_SPEED;
-            break;
-        case "downleft":
-            bulletX += -16;
-            bulletY += 50;
-            angle = -135;
-            velocityY = C.BULLET_SPEED;
-            velocityX = -C.BULLET_SPEED;
-            break;
-        case "downright":
-            bulletX += 16;
-            bulletY += 50;
-            angle = 135;
-            velocityY = C.BULLET_SPEED;
-            velocityX = C.BULLET_SPEED;
-            break;
-        case "up":
-        default:
-            velocityY = -C.BULLET_SPEED;
-            break;
-    }
-
     bullet.setAttribute("x", bulletX);
     bullet.setAttribute("y", bulletY);
+    bullet.setAttribute("transform", `rotate(${angle} ${bulletX + 5} ${bulletY + 7})`);
 
-    // Center point for rotation
-    const centerX = bulletX + 5; // Center horizontally (width/2)
-    const centerY = bulletY + 7; // Center vertically (height/2)
-
-    // Rotate bullet
-    bullet.setAttribute("transform", `rotate(${angle} ${centerX} ${centerY})`);
-
-    // Add to bullet container
     document.getElementById("bullet-container").appendChild(bullet);
 
     bullets.push({
+        shooter: pId,
         element: bullet,
         x: bulletX,
         y: bulletY,
-        shooter: shooter,
         vx: velocityX,
         vy: velocityY,
     });
-
-    function animateBullet() {
-        bulletX += velocityX;
-        bulletY += velocityY;
-
-        bullet.setAttribute("x", bulletX);
-        bullet.setAttribute("y", bulletY);
-
-        // Check for obstacle collision
-        if (isColliding(bulletX, bulletY, 10, 14)) {
-            //console.log("Bullet hit an obstacle!");
-
-            // Explosion position
-            const explosionX = bulletX - 26;
-            const explosionY = bulletY - 26;
-
-            // Use normal explosion for non-lethal hits (Bullet impact)
-            explosion.setAttribute("href", "./images/Explosion52.gif");
-            explosion.setAttribute("width", "52");
-            explosion.setAttribute("height", "52");
-            explosion.setAttribute("x", explosionX);
-            explosion.setAttribute("y", explosionY);
-
-            // Play explosion sound
-            bulletExplosion.currentTime = 0;
-            bulletExplosion.play().catch((error) => console.log("Audio playback error:", error));
-
-            // Add explosion to the arena
-            document.getElementById("arena").appendChild(explosion);
-
-            // Remove explosion after 500ms
-            setTimeout(() => {
-                explosion.remove();
-            }, 500);
-
-            // Remove from bullets array
-            bullets = bullets.filter((b) => b.element !== bullet); // Clean up bullets array
-            return;
-        }
-
-        // Keep the rotation while moving
-        bullet.setAttribute("transform", `rotate(${angle} ${bulletX + 5} ${bulletY + 7})`);
-
-        if (bulletX > 0 && bulletX < 1344 && bulletY > 0 && bulletY < 768) {
-            requestAnimationFrame(animateBullet);
-        } else {
-            bullet.remove();
-        }
-    }
-
-    requestAnimationFrame(animateBullet);
 }
 
 function checkBulletCollision(bullet) {
@@ -849,7 +803,7 @@ function checkBulletCollision(bullet) {
 }
 
 function handlePlayerHit(player, bullet) {
-    console.log("Player hit:", player.id, "bullet:", bullet.shooter);
+    console.log("Player hit:", player.id, "bullet:", bullet.shooter, "I should delete bullet first!");
     // Decrease health
     // if (player.id === playerId) {
     //     health -= 20;
@@ -938,36 +892,60 @@ function handlePlayerHit(player, bullet) {
     // Create explosion image
 }
 
-function updateBullets() {
+function updateBullets(deltaTime) {
     for (let i = bullets.length - 1; i >= 0; i--) {
         let bullet = bullets[i];
-        bullet.x += bullet.vx;
-        let newX = bullet.x;
-        bullet.y += bullet.vy;
-        let newY = bullet.y;
-        // **Check if the bullet collides with an obstacle**
-        if (isColliding(newX, newY, 10, 14)) {
-            // Bullet size is 10x14
-            //console.log("Bullet hit an obstacle!");
-            // **Remove the bullet**
-            bullet.element.remove();
-            bullets.splice(i, 1); // Remove bullet
-            // **Play explosion sound**
+        let deltaFactor = deltaTime / 16.67; // Normalize frame time
+
+        bullet.x += bullet.vx * deltaFactor;
+        bullet.y += bullet.vy * deltaFactor;
+
+        // Check if bullet hits a player
+        let hitSomething = false;
+        let hitObstacle = false;
+        if (checkBulletCollision(bullet)) {
+            console.log(`Bullet hit a player! Bullet: ${bullet}`);
+            hitSomething = true;
+        }
+        // Check obstacle collision (only if it didn't hit a player)
+        else if (isColliding(bullet.x, bullet.y, 10, 14)) {
+            console.log("Bullet hit an obstacle!");
+            hitSomething = true;
+            hitObstacle = true;
+
             bulletExplosion.currentTime = 0;
             bulletExplosion.play().catch((error) => console.log("Audio playback error:", error));
-            return;
         }
-        bullet.element.setAttribute("x", bullet.x);
-        bullet.element.setAttribute("y", bullet.y);
-        // Keep bullet rotated while moving
-        const angle = parseFloat(bullet.element.getAttribute("transform").match(/rotate\((-?\d+)/)[1]);
-        bullet.element.setAttribute("transform", `rotate(${angle} ${bullet.x + 5} ${bullet.y + 7})`);
-        // Check if bullet hits a player
-        if (checkBulletCollision(bullet)) {
+
+        if (hitSomething && hitObstacle) {
+            const explosionX = bullet.x - 13;
+            const explosionY = bullet.y - 13;
+            const explosion = document.createElementNS("http://www.w3.org/2000/svg", "image");
+            explosion.setAttribute("href", "./images/Explosion52.gif");
+            explosion.setAttribute("width", "52");
+            explosion.setAttribute("height", "52");
+            explosion.setAttribute("x", explosionX);
+            explosion.setAttribute("y", explosionY);
+
+            document.getElementById("arena").appendChild(explosion);
+            // Remove explosion after 500ms
+            setTimeout(() => {
+                explosion.remove();
+            }, 500);
+        }
+
+        if (hitSomething) {
+            console.log("deleting bullet");
             bullet.element.remove();
-            bullets.splice(i, 1); // Remove bullet
+            bullets.splice(i, 1);
             continue;
         }
+
+        bullet.element.setAttribute("x", bullet.x);
+        bullet.element.setAttribute("y", bullet.y);
+        let angle = parseFloat(bullet.element.getAttribute("transform").match(/rotate\((-?\d+)/)[1]);
+        bullet.element.setAttribute("transform", `rotate(${angle} ${bullet.x + 5} ${bullet.y + 7})`);
+
         // Remove bullet if out of bounds
         if (bullet.x < 0 || bullet.x > 1344 || bullet.y < 0 || bullet.y > 768) {
             bullet.element.remove();
