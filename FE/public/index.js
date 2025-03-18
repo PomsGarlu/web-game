@@ -806,14 +806,19 @@ function checkBulletCollision(bullet) {
                 bulletBox.y < playerBox.y + playerBox.height &&
                 bulletBox.y + bulletBox.height > playerBox.y
             ) {
-                console.log(`Bullet hit ${player.id}!`);
-                ws.send;
-                handlePlayerHit(player, bullet); // Pass bullet position to explosion
-                return true; // Collision detected
+                if (player.id !== playerId) {
+                    console.log(`Bullet hit ${player.id}!`);
+                    console.log("Id test:", player.id, playerId);
+                    ws.send;
+                    handlePlayerHit(player, bullet); // Pass bullet position to explosion
+                    return { hitSomething: true, deleteBullet: true }; // Collision detected
+                } else {
+                    return { hitSomething: false, deleteBullet: true };
+                }
             }
         }
     }
-    return false;
+    return { hitSomething: false, deleteBullet: false };
 }
 
 function handlePlayerHit(player, bullet) {
@@ -915,11 +920,13 @@ function updateBullets(deltaTime) {
         bullet.y += bullet.vy * deltaFactor;
 
         // Check if bullet hits a player
-        let hitSomething = false;
         let hitObstacle = false;
-        if (checkBulletCollision(bullet)) {
+
+        let { hitSomething, deleteBullet } = checkBulletCollision(bullet);
+        if (hitSomething) {
             console.log(`Bullet hit a player! Bullet: ${bullet}`);
-            hitSomething = true;
+        } else if (deleteBullet) {
+            console.log("Bullet hit player, deleting it.");
         }
         // Check obstacle collision (only if it didn't hit a player)
         else if (isColliding(bullet.x, bullet.y, 10, 14)) {
@@ -948,7 +955,7 @@ function updateBullets(deltaTime) {
             }, 500);
         }
 
-        if (hitSomething) {
+        if (hitSomething || deleteBullet) {
             console.log("deleting bullet");
             bullet.element.remove();
             bullets.splice(i, 1);
